@@ -1,0 +1,106 @@
+﻿@inherits ComponentBase
+<div class="panel panel-primary">
+    <div class="panel-heading">
+        <h4 class="panel-title">@Title</h4>
+        <div class="panel-heading-btn">
+            <a href="javascript:;" class="btn btn-xs btn-icon btn-circle" data-click="panel-expand"><i class="fa fa-expand"></i></a>
+        </div>
+    </div>
+    <div class="panel-body">
+        <div class="@BodyCss">
+            <EditForm EditContext="FormEditContext" OnValidSubmit="OnSave">
+                <DataAnnotationsValidator />
+                @*<div class="form-group row">
+                    <div class="col-12">
+                        <Microsoft.AspNetCore.Components.Forms.ValidationSummary />
+                    </div>
+                </div>*@
+                <div class="form-group row">
+                    <div class="col-12">
+                        @ChildContent
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-12 ">
+                        <button type="submit" class="btn btn-primary mr-1" tabindex="51">Save</button>
+                    </div>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+</div>
+
+@code {
+
+    public class EditModes
+    {
+        public static string Delete => "Delete";
+        public static string Edit => "Edit";
+        public static string New => "New";
+    };
+
+    [Inject] private IJSRuntime JS { get; set; }
+
+    [Parameter] public object Model { get; set; }
+
+    [Parameter] public RenderFragment ChildContent { get; set; }
+    [Parameter] public RenderFragment LeftButtons { get; set; }
+
+    [Parameter] public string Mode { get; set; }
+    [Parameter] public string ReturnUrl { get; set; }
+    [Parameter] public string Title { get; set; } = "User Edit";
+    [Parameter] public string BodyCss { get; set; } = "col-sm-12 col-md-6";
+    [Parameter] public bool IsReadOnly { get; set; }
+    [Parameter] public bool ShowCancel { get; set; } = true;
+
+    [Parameter] public EventCallback<EditContext> OnValidSubmit { get; set; }
+    [Parameter] public EventCallback Cancel { get; set; }
+    [Parameter] public EventCallback<string> PropertyChanged { get; set; }
+
+
+    private EditContext FormEditContext { get; set; }
+    private bool ShowWait { get; set; } = true;
+
+        protected override Task OnInitializedAsync()
+        {
+            FormEditContext = new EditContext(Model);
+            return base.OnInitializedAsync();
+        }
+
+
+    private void OnChange(object sender, FieldChangedEventArgs e)
+    {
+        //if (e.FieldIdentifier.FieldName != "CurrentValue")
+        //    PropertyChanged.InvokeAsync(e.FieldIdentifier.FieldName);
+
+    }
+    private async Task OnSave()
+    {
+        try
+        {
+
+            ShowWait = true;
+            await OnValidSubmit.InvokeAsync(FormEditContext);
+            ShowWait = false;
+        }
+        catch (Exception ex)
+        {
+            ShowWait = false;
+        }
+
+    }
+    private async Task Delete()
+    {
+        try
+        {
+            ShowWait = true;
+            await OnValidSubmit.InvokeAsync(null);
+            ShowWait = false;
+
+            //await this.NavigateTo(ReturnUrl);
+        }
+        catch (Exception ex)
+        {
+            ShowWait = false;
+        }
+    }}

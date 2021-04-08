@@ -1,0 +1,204 @@
+﻿@page "/Starter"
+@page "/Starter/{ID:int}"
+@implements IDisposable
+
+<CascadingValue Name="UpdateTrigger" Value="this.UpdateTrigger">
+    <div class="content px-sm-3 m-2">
+        <div class="row">
+            <div class="col-2 form-label">
+                Async:
+            </div>
+            <div class="col-2">
+                <select class="form-control" @onchange="(e) => OnChangeAsync(e)">
+                    <option value="None">None</option>
+                    @foreach (var genre in this.genres)
+                    {
+                        <option value="@genre">@genre</option>
+                    }
+                </select>
+            </div>
+            <div class="col-2 form-label">
+                Void:
+            </div>
+            <div class="col-2">
+                <select class="form-control" @onchange="OnChange">
+                    <option value="None">None</option>
+                    @foreach (var genre in this.genres)
+                    {
+                        <option value="@genre">@genre</option>
+                    }
+                </select>
+            </div>
+            <div class="col-2 form-label">
+                Event Driven:
+            </div>
+            <div class="col-2">
+                <select class="form-control" @onchange="OnChangeWithEvent">
+                    <option value="None">None</option>
+                    @foreach (var genre in this.genres)
+                    {
+                        <option value="@genre">@genre</option>
+                    }
+                </select>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12 mt-2 text-right">
+                <button class="btn btn-success" @onclick="Refresh">Refresh Page</button>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-6">
+                <div class="container bg-primary text-white m-2 px-3 pt-3 pb-0">
+                    <div class="row">
+                        <div class="col-12">
+                            <h3>Form Result</h3>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-2">
+                            Result:
+                        </div>
+                        <div class="col-4">
+                            @this.DataService.Genre
+                        </div>
+                    </div>
+                    <div class="row bg-dark">
+                        <div class="col-3">
+                            Init:
+                        </div>
+                        <div class="col-1">
+                            @this.InitRun
+                        </div>
+                        <div class="col-3">
+                            Params Set:
+                        </div>
+                        <div class="col-1">
+                            @this.ParamsSetRun
+                        </div>
+                        <div class="col-3">
+                            Rendered:
+                        </div>
+                        <div class="col-1">
+                            @this.Rendered
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6">
+                <ShowResult Result="@this.DataService.Genre"></ShowResult>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-6">
+                <ShowGenre></ShowGenre>
+            </div>
+            <div class="col-6">
+                <ShowGenre WireUp="true" Title="Wired Up Genre Control"></ShowGenre>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-6">
+                <ShowGenreTriggered Title="Triggered Genre Control"></ShowGenreTriggered>
+            </div>
+        </div>
+    </div>
+</CascadingValue>
+
+    @code {
+
+        [Parameter] public int Id { get; set; } = 0;
+
+        [Inject] public NavigationManager NavManager { get; set; }
+
+        [Inject] public DataService DataService { get; set; }
+
+        public Guid UpdateTrigger { get; private set; } = Guid.NewGuid();
+
+        private List<string> genres
+        => new List<string>() { "Rock", "Folk", "Blues", "Pop" };
+
+        private int InitRun = 0;
+        private int ParamsSetRun = 0;
+        private int Rendered = 1;
+
+
+        protected override Task OnInitializedAsync()
+        {
+            this.InitRun++;
+            // this.DataService.RecordChanged += OnRecordChanged;
+            return base.OnInitializedAsync();
+        }
+
+        protected override Task OnParametersSetAsync()
+        {
+            this.ParamsSetRun++;
+            return base.OnParametersSetAsync();
+        }
+
+        protected override bool ShouldRender()
+        {
+            Rendered++;
+            return true;
+        }
+
+        private async Task OnChangeAsync(ChangeEventArgs e)
+        {
+            var selected = e.Value.ToString();
+            this.DataService.SetGenreQuietly("Getting it, wait!!!");
+            this.UpdateTrigger = Guid.NewGuid();
+            // await this.GetData(selected);
+            await this.GetDataQuietly(selected);
+        }
+
+        private async void OnChange(ChangeEventArgs e)
+        {
+            var selected = e.Value.ToString();
+            this.DataService.SetGenreQuietly("Getting it, wait!!!");
+            await this.GetData(selected);
+            //await this.GetDataQuietly(selected);
+        }
+
+        private async void OnChangeWithEvent(ChangeEventArgs e)
+        {
+            this.DataService.RecordChanged += OnRecordChanged;
+            var selected = e.Value.ToString();
+            this.DataService.SetGenreQuietly("Getting it, wait!!!");
+            await this.GetData(selected);
+            this.DataService.RecordChanged -= OnRecordChanged;
+        }
+
+        private void OnRecordChanged(object sender, EventArgs e)
+            => this.InvokeAsync(StateHasChanged);
+
+        private async Task GetDataQuietly(string selected)
+        {
+            await Task.Delay(2000);
+            if (selected.Equals("None", StringComparison.CurrentCultureIgnoreCase))
+                this.DataService.SetGenreQuietly("Give it another Go!");
+            else
+                this.DataService.SetGenreQuietly(selected);
+            this.UpdateTrigger = Guid.NewGuid();
+        }
+
+        private void Refresh(MouseEventArgs e)
+        {
+            this.NavManager.NavigateTo($"/starter/{this.Id + 1}");
+        }
+
+        private async Task GetData(string selected)
+        {
+            await Task.Delay(2000);
+            if (selected.Equals("None", StringComparison.CurrentCultureIgnoreCase))
+                this.DataService.Genre = "Give it another Go!";
+            else
+                this.DataService.Genre = selected;
+        }
+
+        public void Dispose()
+        {
+            this.DataService.RecordChanged -= OnRecordChanged;
+        }
+
+    }
+

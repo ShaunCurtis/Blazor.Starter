@@ -1,0 +1,45 @@
+﻿@implements IDisposable
+<EditForm EditContext="EditContext" OnValidSubmit="ValidatedSubmit">
+    <DataAnnotationsValidator />
+    @ChildContent
+    <button type="submit">Submit</button>
+</EditForm>
+<div>@message</div>
+
+@code {
+
+    [Parameter] public RenderFragment ChildContent { get; set; }
+
+    [Parameter] public object Model { get; set; }
+
+    [Parameter] public EventCallback<EditContext> OnValidSubmit { get; set; }
+
+    private string message = "No";
+
+    protected EditContext EditContext;
+
+    protected override Task OnParametersSetAsync()
+    {
+        if (this.EditContext is null)
+        {
+            EditContext = new EditContext(Model);
+            EditContext.OnFieldChanged += this.OnFieldChanged;
+        }
+        return base.OnParametersSetAsync();
+    }
+
+    private void OnFieldChanged(object sender, EventArgs e)
+    {
+        var x = true;
+    }
+
+    private Task ValidatedSubmit()
+    {
+        OnValidSubmit.InvokeAsync(EditContext);
+        message = $"clicked at {DateTime.Now.ToLongTimeString()}";
+        return Task.CompletedTask;
+    }
+
+    public void Dispose()
+      => EditContext.OnFieldChanged -= this.OnFieldChanged;
+}

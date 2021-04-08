@@ -1,0 +1,54 @@
+﻿@page "/"
+@layout Blazor.Starter.Shared.MainLayout
+
+<h1>Hello, world!</h1>
+
+Welcome to your new app.
+
+<SurveyPrompt Title="How is Blazor working for you?" />
+
+<button class="btn btn-dark" @onclick="() => GoToView(typeof(Counter))">Load Counter</button>
+
+<button class="btn btn-dark" @onclick="() => GoToView(typeof(FetchData))">Load FetchData</button>
+
+<button class="btn btn-dark ml-2" @onclick="() => GoToUrl()">Go To Url</button>
+
+<button class="btn btn-danger ml-2" @onclick="() => ChangeLayout()">@_layoutButtonText</button>
+
+@code {
+
+    [CascadingParameter] public RouteViewManager RouteViewManager { get; set; }
+
+    [Inject] private RouteViewService RouteViewService { get; set; }
+
+    [Inject] private NavigationManager NavManager { get; set; }
+
+    private bool _hasViewManager => RouteViewManager != null;
+
+    private string _layoutButtonText => RouteViewService.Layout != null ? "Normal Layout" : "Red Layout";
+
+    void GoToView(Type view)
+    {
+        if (_hasViewManager)
+        {
+            //var view = new ViewData(typeof(Counter));
+            RouteViewManager.LoadViewAsync(view);
+        }
+
+    }
+
+    void GoToUrl()
+    {
+        NavManager.NavigateTo("/counters");
+
+    }
+
+    void ChangeLayout()
+    {
+        if (RouteViewService.Layout == null)
+            RouteViewService.Layout = typeof(RedLayout);
+        else
+            RouteViewService.Layout = null;
+        RouteViewManager.Render();
+    }
+}

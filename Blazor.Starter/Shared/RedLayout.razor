@@ -1,0 +1,57 @@
+﻿@inherits LayoutComponentBase
+
+<div class="page">
+    <div class="sidebar">
+        <NavMenu />
+    </div>
+
+    <div class="main">
+        <div class="top-row px-4">
+            <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
+        </div>
+
+        <div class="content px-4">
+            <div>
+                <button class="btn btn-dark" @onclick="() => GoToView(typeof(Counter))">Load Counter</button>
+                <button class="btn btn-dark" @onclick="() => GoToView(typeof(FetchData))">Load FetchData</button>
+                <button class="btn btn-danger ml-2" @onclick="() => ChangeLayout()">@_layoutButtonText</button>
+            </div>
+            @Body
+        </div>
+    </div>
+</div>
+
+@code {
+
+    [CascadingParameter] public RouteViewManager RouteViewManager { get; set; }
+
+    [Inject] private RouteViewService RouteViewService { get; set; }
+
+    [Inject] private NavigationManager NavManager { get; set; }
+
+    private bool _hasViewManager => RouteViewManager != null;
+
+    private string _layoutButtonText => RouteViewService.Layout != null ? "Normal Layout" : "Red Layout";
+
+    void GoToView(Type view)
+    {
+        if (_hasViewManager)
+        {
+            RouteViewManager.LoadViewAsync(view);
+        }
+    }
+
+    void GoToUrl()
+    {
+        NavManager.NavigateTo("/counters");
+    }
+
+    void ChangeLayout()
+    {
+        if (RouteViewService.Layout == null)
+            RouteViewService.Layout = typeof(RedLayout);
+        else
+            RouteViewService.Layout = null;
+        RouteViewManager.Render();
+    }
+}

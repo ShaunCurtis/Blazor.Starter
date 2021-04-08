@@ -1,0 +1,146 @@
+﻿@page "/eventbuttons" 
+<div class="container m-2 px-3 p-t bg-light">
+    <div class="row pt-2">
+        <div class="col-12">
+            <h3>Event Buttons</h3>
+        </div>
+    </div>
+    <div class="row pt-2">
+        <div class="col-6">
+            @value1
+        </div>
+        <div class="col-6">
+            <button class="btn btn-warning" @onclick="this.Onclick">Click</button>
+        </div>
+    </div>
+    <div class="row pt-2">
+        <div class="col-6">
+            @value2
+        </div>
+        <div class="col-6">
+            <button class="btn btn-warning" @onclick="this.OnclickTask">Click Task</button>
+        </div>
+    </div>
+    <div class="row pt-2">
+        <div class="col-6">
+            @value3
+        </div>
+        <div class="col-6">
+            <button class="btn btn-warning" @onclick="(e) => this.OnclickLambda(e) ">Click Lambda</button>
+        </div>
+    </div>
+    <div class="row pt-2">
+        <div class="col-6">
+            @value4
+        </div>
+        <div class="col-6">
+            <button class="btn btn-warning" @onclick="async (e) => await this.OnclickLambdaTask(e) ">Click Lambda Task</button>
+        </div>
+    </div>
+    <div class="row pt-2">
+        <div class="col-6">
+            @value5
+        </div>
+        <div class="col-6">
+            <UIButton OnClick="OnclickComponent">click me</UIButton>
+        </div>
+    </div>
+    <div class="row bg-dark mt-2 text-white">
+        <div class="col-3">
+            Initialized:
+        </div>
+        <div class="col-1">
+            @this.InitRun
+        </div>
+        <div class="col-3">
+            Params Set:
+        </div>
+        <div class="col-1">
+            @this.ParamsSetRun
+        </div>
+        <div class="col-3">
+            Rendered:
+        </div>
+        <div class="col-1">
+            @this.Rendered
+        </div>
+    </div>
+</div>
+
+
+@code {
+    private async Task OnclickComponent(MouseEventArgs e)
+    {
+        value5 = "Onclick started";
+        await Task.Delay(2000);
+        await DoSomethingAsync();
+        value5 = "Onclick complete";
+    }
+
+    private async void Onclick(MouseEventArgs e)
+    {
+        value1 = "Onclick started";
+        await DoSomethingAsync();
+        value1 = "Onclick complete";
+    }
+
+    private async Task OnclickTask(MouseEventArgs e)
+    {
+        value2 = "OnclickTask started";
+        await DoSomethingAsync();
+        value2 = "OnclickTask complete";
+    }
+
+    private async void OnclickLambda(MouseEventArgs e)
+    {
+        value3 = "OnclickLambda started";
+        await DoSomethingAsync();
+        value3 = "OnclickLambda complete";
+    }
+
+    private async Task OnclickLambdaTask(MouseEventArgs e)
+    {
+        value4 = "OnclickLambdaTask started";
+        await Task.Delay(2000);
+        await DoSomethingAsync();
+        value4 = "OnclickLambdaTask complete";
+    }
+
+    private async Task DoSomethingAsync()
+    {
+        await Task.Yield();
+        // return Task.CompletedTask;
+    }
+
+    private string value1 = "notset";
+    private string value2 = "notset";
+    private string value3 = "notset";
+    private string value4 = "notset";
+    private string value5 = "notset";
+
+    private int InitRun = 0;
+    private int ParamsSetRun = 0;
+    private int Rendered = 1;
+
+
+    protected override Task OnInitializedAsync()
+    {
+        this.InitRun++;
+        // this.DataService.RecordChanged += OnRecordChanged;
+        return base.OnInitializedAsync();
+    }
+
+    protected override Task OnParametersSetAsync()
+    {
+        this.ParamsSetRun++;
+        return base.OnParametersSetAsync();
+    }
+
+    protected override bool ShouldRender()
+    {
+        Rendered++;
+        return true;
+    }
+
+
+}

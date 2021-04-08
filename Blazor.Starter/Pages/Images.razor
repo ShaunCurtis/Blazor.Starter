@@ -1,0 +1,47 @@
+﻿@page "/Images"
+
+<div class="@(Base64Images.Count > 0 ? "block" : "hidden")">
+    @foreach (var image in Base64Images)
+    {
+        <h4>Images goes here</h4>
+        <img src="@image" />
+    }
+
+</div>
+
+@if (!_hasImages)
+{
+<div>
+    <InputFile OnChange="@OnInputFileChange" multiple />
+</div>
+}
+else
+{
+    <div>
+        @foreach (var image in Base64Images)
+        {
+            <h4>More Images goes here</h4>
+            <img src="@image" />
+        }
+    </div>
+}
+
+
+<button class="btn btn-dark" @onclick="() => Click()"> Click</button>
+@code {
+
+    List<string> Base64Images = new List<string>();
+
+    private bool _hasImages => Base64Images != null && Base64Images.Count > 0;
+
+    void Click()
+    {
+        Base64Images.Add("Bye");
+    }
+
+    private async Task OnInputFileChange(InputFileChangeEventArgs e)
+    {
+        await Task.Delay(1000);
+        Base64Images.Add("Bye");
+    }
+}

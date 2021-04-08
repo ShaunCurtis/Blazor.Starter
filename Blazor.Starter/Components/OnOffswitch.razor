@@ -1,0 +1,18 @@
+﻿@page "/onoff"
+<div>
+    <button class="btn btn-dark" @onclick="Switch">Toggle</button>
+</div>
+
+@if (_display)
+{
+    <h3>Hello World</h3>
+}
+
+<OnOffComponent Display="this._display"></OnOffComponent>
+
+@code {
+    private bool _display = false;
+
+    private void Switch(MouseEventArgs e)
+        => _display = !_display;
+}

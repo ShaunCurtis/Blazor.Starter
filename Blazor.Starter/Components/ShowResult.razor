@@ -1,0 +1,63 @@
+﻿<div class="container bg-secondary text-white m-2 px-3 pt-3 pb-0">
+    <div class="row">
+        <div class="col-12">
+            <h3>Control Result</h3>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-2">
+            Result:
+        </div>
+        <div class="col-4">
+            @this.Result
+        </div>
+    </div>
+    <div class="row bg-dark">
+        <div class="col-3">
+            Init:
+        </div>
+        <div class="col-1">
+            @this.InitRun
+        </div>
+        <div class="col-3">
+            Params Set:
+        </div>
+        <div class="col-1">
+            @this.ParamsSetRun
+        </div>
+        <div class="col-3">
+            Rendered:
+        </div>
+        <div class="col-1">
+            @this.Rendered
+        </div>
+    </div>
+</div>
+
+@code {
+
+    [Parameter] public string Result { get; set; } = "No Result at the Moment!";
+
+    private int InitRun = 0;
+    private int ParamsSetRun = 0;
+    private int Rendered = 1;
+
+    protected override Task OnInitializedAsync()
+    {
+        this.InitRun++;
+        return base.OnInitializedAsync();
+    }
+
+    protected override Task OnParametersSetAsync()
+    {
+        this.ParamsSetRun++;
+        return base.OnParametersSetAsync();
+    }
+
+    protected override Task OnAfterRenderAsync(bool firstRender)
+    {
+        Rendered++;
+        return base.OnAfterRenderAsync(firstRender);
+    }
+
+}

@@ -1,0 +1,9 @@
+﻿<button class="btn btn-warning" @onclick="this.BtnClick">@ChildContent</button>
+
+@code {
+    [Parameter] public EventCallback<MouseEventArgs> OnClick { get; set; }
+    [Parameter] public RenderFragment ChildContent { get; set; }
+
+    private async Task BtnClick(MouseEventArgs e)
+        => await OnClick.InvokeAsync(e);
+}

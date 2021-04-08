@@ -1,0 +1,36 @@
+﻿@page "/EditorForm"
+<h3>EditForm</h3>
+
+@*<EditorCard Model="@model" Mode="@Mode" Title="@Title" ReturnUrl="/administration/users" OnValidSubmit="@Save" Cancel="Cancel">
+    <ChildContent>
+        <InputText @bind-Value="@model.Email" />
+    </ChildContent>
+</EditorCard>*@
+
+@code {
+
+    private string Mode = "Edit";
+
+    private string Title = "Model Editor";
+
+    public class Model
+    {
+        public string Email { get; set; }
+    }
+
+    private Model model { get; set; } = new Model() { Email = "me@you.com" };
+
+    private void Save(EditContext editContext)
+    {
+        var x = true;
+    }
+
+
+    private void Cancel()
+    {
+        var x = true;
+    }
+
+
+
+}

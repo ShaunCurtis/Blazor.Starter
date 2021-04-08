@@ -1,0 +1,9 @@
+﻿@if (this.Show)
+{
+    @this.ChildContent
+}
+
+@code {
+    [Parameter] public bool Show { get; set; }
+    [Parameter] public RenderFragment ChildContent { get; set; }
+}
