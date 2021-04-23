@@ -1,0 +1,32 @@
+﻿@page "/loader"
+<UILoader Loaded="this.Loaded">
+    <h3>UILoader Test</h3>
+    <button class="btn btn-success" @onclick="Reload">Reload</button>
+</UILoader>
+
+@code {
+
+    private bool Loaded = false;
+
+    protected async override Task OnInitializedAsync()
+    {
+        await LoadEverything();
+        this.Loaded = true;
+    }
+
+
+    private async Task LoadEverything()
+    {
+        await Task.Delay(2000);
+        // make sure everything is loaded before completing i.e. returning a completed Task
+    }
+
+    private async Task Reload(MouseEventArgs e)
+    {
+        this.Loaded = false;
+        await InvokeAsync(StateHasChanged);
+        await LoadEverything();
+        this.Loaded = true;
+        await InvokeAsync(StateHasChanged);
+    }
+}

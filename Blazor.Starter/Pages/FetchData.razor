@@ -30,6 +30,7 @@ else
                     <td>@forecast.TemperatureC</td>
                     <td>@forecast.TemperatureF</td>
                     <td>@forecast.Summary</td>
+                    <td><button class="btn btn-danger" @onclick="() => GetForcast(forecast)"  ></button></td>
                 </tr>
             }
         </tbody>
@@ -37,10 +38,15 @@ else
 }
 
 @code {
-    private WeatherForecast[] forecasts;
+    private List<WeatherForecast> forecasts => ForecastService.Records;
 
     protected override async Task OnInitializedAsync()
     {
-        forecasts = await ForecastService.GetForecastAsync(DateTime.Now);
+        await ForecastService.GetForecastsAsync(DateTime.Now);
+    }
+
+    protected void GetForcast(WeatherForecast forecast)
+    {
+        var x = forecast;
     }
 }

@@ -1,56 +1,22 @@
 ﻿@page "/Test"
-@implements IDisposable
 
-    @foreach (var row in rows)
-    {
-        <input @onkeydown="(e) => KeyDown(e, row, this)" @ref="addInput" value="@row">
-    }
+@{ var x = 1;}
+@foreach (var c in Countries)
+{
+    <div> @x - @c</div>
+    x++;
+}
 
-<h3>@MyBase.Message</h3>
 @code {
 
-    [Inject] private BaseService MyBase { get; set; }
+    private string _message = "Starting";
 
-    void ConsumerMethod()
+    protected async override Task OnInitializedAsync()
     {
-        var x = MyBase.Message;
+        _message = "Sync Code running";
+        await Task.Delay(2000);
+        _message = "Async Code completed";
     }
 
-    void SetterMethod()
-    {
-        MyBase.Message = "Bonjour";
-    }
-
-    protected override Task OnInitializedAsync()
-    {
-        MyBase.MessageChanged += UpdateHandler;
-        return base.OnInitializedAsync();
-    }
-
-    private void UpdateHandler(object sender, EventArgs e)
-            => this.InvokeAsync(StateHasChanged);
-
-    private List<string> rows = new List<string>() { "UK", "France", "Germany", "Australia" };
-
-    private List<ElementReference> inputs = new List<ElementReference>();
-
-    private ElementReference addInput
-    {
-        set => inputs.Add(value);
-    }
-
-    private Task KeyDown(KeyboardEventArgs args, string row, object sender)
-    {
-        if (args.Code == "ArrowDown")
-        {
-            //TODO: Find out which dynamic MyInput-instance
-            //      within the inputs collection triggered the event
-        }
-        return Task.CompletedTask;
-    }
-
-    public void Dispose()
-    {
-        MyBase.MessageChanged -= UpdateHandler;
-    }
+    private List<string> Countries => new List<string>() { "Adijan", "Lagos", "Tripoli" };
 }

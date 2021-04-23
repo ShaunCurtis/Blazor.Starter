@@ -8,5 +8,6 @@ namespace Blazor.Starter.Data
     public class DataModel
     {
         public string Email { get; set; }
+
     }
 }

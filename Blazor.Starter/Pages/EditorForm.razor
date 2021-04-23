@@ -1,11 +1,18 @@
 ﻿@page "/EditorForm"
 <h3>EditForm</h3>
 
-@*<EditorCard Model="@model" Mode="@Mode" Title="@Title" ReturnUrl="/administration/users" OnValidSubmit="@Save" Cancel="Cancel">
-    <ChildContent>
-        <InputText @bind-Value="@model.Email" />
-    </ChildContent>
-</EditorCard>*@
+<EditForm Model="model">
+    <div class="input-group mb-3">
+        <div class="input-group-prepend">
+            <span class="input-group-text" id="inputGroupFileAddon01">Upload</span>
+        </div>
+        <div class="custom-file">
+            <InputFile class="custom-file-input"></InputFile>
+            <label class="custom-file-label" for="inputGroupFile01">Choose file</label>
+        </div>
+    </div>
+    <InputFile></InputFile>
+</EditForm>
 
 @code {
 

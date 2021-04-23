@@ -1,0 +1,22 @@
+﻿@page "/date"
+<h3>Date</h3>
+<div>
+    <label for="from">From</label>
+    <input id="from" type="date" @bind="myDate" />
+</div>
+
+<div>
+    <label for="from1">From</label>
+    <input id="from1" type="date" />
+</div>
+
+<div>
+    @DisplayDate
+    </div>
+
+@code {
+    private DateTime? fromDate;
+    Nullable<DateTime> myDate;
+
+    private string DisplayDate => fromDate?.ToString("yyyy-MM-ddTHH:mm:ssZ") ?? "No Date Selected";
+}

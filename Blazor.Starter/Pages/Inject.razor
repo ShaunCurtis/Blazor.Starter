@@ -1,0 +1,16 @@
+﻿@page "/inject"
+<TextBox Value=@myVariable></TextBox>
+<TextBox Value="@myVariable"></TextBox>
+<TextBox Value="@(myVariable)"></TextBox>
+<TextBox Value="me.myVariable"></TextBox>
+@code {
+
+    string myVariable = "Hello World";
+
+    myClass me = new myClass();
+
+    class myClass
+    {
+        string myVariable = "Hello World";
+    }
+}

@@ -1,0 +1,10 @@
+﻿@page "/exceptionpage"
+
+<div class="m-3 p-3">
+    <button class="btn btn-danger ml-2" @onclick="() => ThrowException()">Throw Exception</button>
+</div>
+
+@code {
+    void ThrowException()
+        => throw new NotImplementedException();
+}

@@ -18,6 +18,12 @@
     </tr>
 </table>
 
+@foreach (var crew in Crews)
+{
+    var thisitem = crew;
+<span>@thisitem</span>
+}
+
 @code {
 
     public List<ICrew> Crews => CrewsOnLeave.Count > 0 ? CrewsOnLeave.Select(item => (ICrew)item).ToList() : CrewsOnBoard.Select(item => (ICrew)item).ToList();

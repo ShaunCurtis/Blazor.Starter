@@ -1,0 +1,23 @@
+﻿@namespace Blazor.Starter.Components
+@inherits ComponentBase
+    @if (this.Loaded)
+    {
+        @this.ChildContent
+    }
+    else
+    {
+        <div id="app">
+                <div class="mt-4" style="margin-right:auto; margin-left:auto; width:100%;">
+                    <div class="loader"></div>
+                    <div style="width:100%; text-align:center;"><h4>@Message</h4></div>
+                </div>
+            </div>
+    }
+
+@code {
+    [Parameter] public RenderFragment ChildContent { get; set; }
+
+    [Parameter] public bool Loaded { get; set; }
+
+    [Parameter] public string Message { get; set; } = "Display Loading";
+}

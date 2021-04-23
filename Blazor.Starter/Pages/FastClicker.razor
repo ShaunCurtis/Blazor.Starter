@@ -1,0 +1,28 @@
+﻿@page "/fastclicker"
+<h3>FastClicker</h3>
+
+<div>
+    <button class="btn btn-dark" disabled="@disabled" @onclick="OnClick">Click Hard, Click Fast.  Get me to 11!</button>
+</div>
+<div>
+    Counter: @counter
+</div>
+
+
+@code {
+
+    private int counter = 0;
+
+    private bool disabled;
+
+    private async Task OnClick(MouseEventArgs e)
+    {
+        await Task.Delay(1000);
+        if (counter >= 9)
+        {
+            disabled = true;
+        }
+        counter++;
+        // return Task.CompletedTask;
+    }
+}
