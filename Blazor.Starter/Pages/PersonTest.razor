@@ -1,0 +1,39 @@
+﻿@page "/PersonTest"
+<h3>PersonTest</h3>
+
+<h1>Hello, world!</h1>
+
+Welcome to your new app.
+
+<EditForm Model="@person" OnValidSubmit="@PublishMessage">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label for="firstName">First Name</label>
+        <InputText id="firstName" class="form-control" @bind-Value="person.FirstName" />
+    </div>
+    <div class="form-group">
+        <label for="lastName">Last Name</label>
+        <InputText id="lastName" class="form-control" @bind-Value="person.LastName" />
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+</EditForm>
+
+@code{
+    private PersonModel person = new PersonModel();
+
+    private async Task PublishMessage()
+    {
+        await Task.Delay(1000);
+        person = new PersonModel();
+    }
+
+    public class PersonModel
+    {
+        [Required] public string MiddleName { get; set; }
+        [Required] public string FirstName { get; set; }
+        public string LastName { get; set; }
+    }
+
+}

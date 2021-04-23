@@ -1,7 +1,13 @@
 ﻿@page "/loader"
+@layout LoaderLayout
 <UILoader Loaded="this.Loaded">
-    <h3>UILoader Test</h3>
-    <button class="btn btn-success" @onclick="Reload">Reload</button>
+    <ChildContent>
+        <h3>UILoader Test</h3>
+        <button class="btn btn-success" @onclick="Reload">Reload</button>
+    </ChildContent>
+    <Footer>
+        <div class="bg-primary text-white m-2 p-4">My Newsletter Data</div>
+    </Footer>
 </UILoader>
 
 @code {
