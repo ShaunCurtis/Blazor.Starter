@@ -2,82 +2,122 @@
 
 <h1>Hello, world!</h1>
 
-Welcome to your new app.
+    Welcome to your new app.
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+<div>Nav To = @_message</div>
 
-<button class="btn btn-dark" @onclick="() => GoToView(typeof(Counter))">Load Counter</button>
+<ul>
+    @foreach (var nav in navs)
+    {
+        <li @onclick="@(() => NavTo(nav.Key, ""))"> @nav.Value</li>
+        @*nav.Value returns correct value, but Key ever return "/about"*@
+    }
+</ul>
 
-<button class="btn btn-dark" @onclick="() => GoToView(typeof(FetchData))">Load FetchData</button>
+<div>Nav To = @_message</div>
 
-<button class="btn btn-dark ml-2" @onclick="() => GoToUrl()">Go To Url</button>
 
-<button class="btn btn-danger ml-2" @onclick="() => ChangeLayout()">@_layoutButtonText</button>
+<ul class="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
+    @foreach (var pieza in Piezas)
+    {
+        @* @(pieza.Situacion == "Montada revisada" ? "shadow-blue-500" : pieza.Situacion == "Almacenada" ? "shadow-green-500" : "shadow") *@
+        <li class="col-span-1 relative p-2 rounded-lg bg-white shadow" @onclick="@(() => OnClickPieza(pieza.RefId))">
+            <div class="pb-2 border-b">
+                <div class="block relative w-full pb-24">
+                    @if (string.IsNullOrEmpty(pieza.Thumb))
+                    {
+                        <img class="absolute top-0 left-0 w-full h-full object-center object-contain pointer-events-none" src="/images/bg_nofoto.jpg" alt="">
+                    }
+                    else
+                    {
+                        <img class="absolute top-0 left-0 w-full h-full object-center object-contain pointer-events-none" onerror="if (this.src != '/images/bg_nofoto.jpg') this.src = '/images/bg_nofoto.jpg';" src=@pieza.Thumb alt="">
+                    }
+                </div>
+            </div>
+            <div class="flex-1">
+                <div class="flex justify-between">
+                    <div class="relative mt-1 space-y-2">
+                        <p class="text-gray-900 text-sm font-medium">@pieza.Articulo</p>
+                        <p class="">
+                            @if (pieza.Situacion == "Montada revisada")
+                            {
+                                <span class="px-2 py-1 text-white text-xs font-medium bg-metal rounded-full">@pieza.Situacion</span>
+                            }
+                            else if (pieza.Situacion == "Almacenada")
+                            {
+                                <span class="px-2 py-1 text-white text-xs font-medium bg-metal rounded-full">@pieza.Situacion</span>
+                            }
+                            else
+                            {
+                                <span class="px-2 py-1 text-white text-xs font-medium bg-gray-100 rounded-full">@pieza.Situacion</span>
+                            }
+                        </p>
+                    </div>
+                    <div class="relative mt-1">
+                        <a class="inline-flex items-center justify-center w-8 h-8 text-gray-400 hover:text-gray-500 cursor-pointer" onclick="alert('Claudio esto es un toggle'); return false;">
+                            <span class="sr-only">Open options</span>
+                            <!-- Heroicon name: solid/dots-vertical mr-2 -->
+                            <svg class="w-5 h-5 " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+                            </svg>
+                        </a>
+                        <div class="fixed inset-0 transition-opacity" onclick="alert('Aquí esconde el toggle'); return false;" aria-hidden="true"></div>
+                        <ul class="absolute top-8 -right-2 w-56 mt-2 py-1 text-left bg-white rounded-md shadow-lg divide-y divide-gray-100 z-10" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
+                            <li class="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900">Pasar a vendido</li>
+                            <li class="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900">Pasar a extraviado</li>
+                            <li class="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900">Pasar a mordido por rata</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </li>
+    }
+    <!-- More items... -->
+</ul>
 
-<div class="m-3 p-3">
-    <button class="btn btn-danger ml-2" @onclick="() => ThrowException()">Throw Exception</button>
-</div>
+@code {
 
-@{ var x = 1;}
-@foreach (var c in Countries)
+    [Inject] public NavigationManager NavManager { get; set; }
+
+    public Dictionary<string, string> navs { get; set; } = new Dictionary<string, string>()
 {
-    <div> @x - @c</div>
-    x++;
-}
+            { "/home", "Home" },
+            { "/counter", "Counter" },
+            { "/fetchdata", "Fetch Data" },
+        };
 
-<div>
-    <h3>@_message</h3>
-</div>
+    public class Pieza
+    {
+        public string RefId { get; set; }
+        public string Text { get; set; }
+        public string Situacion { get; set; }
+        public string Articulo { get; set; }
+        public string Thumb { get; set; }
+    }
 
-
-@code {    
+    public List<Pieza> Piezas = new List<Pieza>()
+{
+           new Pieza () { RefId = "/home", Text = "Home" },
+            new Pieza () { RefId =  "/contact", Text = "Contact" },
+            new Pieza () {  RefId = "/about", Text = "About" },
+    };
 
     private string _message = "Starting";
 
-    protected async override Task OnInitializedAsync()
+    private void NavTo(string key, string x)
     {
-        _message = "Sync Code running";
-        await Task.Delay(2000);
-        _message = "Async Code completed";
+        _message = key;
+        NavManager.NavigateTo(key, false);
     }
 
-    private List<string> Countries => new List<string>() { "Aberdeen", "London", "Houston" };
-
-    [CascadingParameter] public RouteViewManager RouteViewManager { get; set; }
-
-    [Inject] private RouteViewService RouteViewService { get; set; }
-
-    [Inject] private NavigationManager NavManager { get; set; }
-
-    private bool _hasViewManager => RouteViewManager != null;
-
-    private string _layoutButtonText => RouteViewService.Layout != null ? "Normal Layout" : "Red Layout";
-
-    void GoToView(Type view)
+    private void OnClickPieza(string key)
     {
-        if (_hasViewManager)
-        {
-            //var view = new ViewData(typeof(Counter));
-            RouteViewManager.LoadViewAsync(view);
-        }
-
+        _message = key.ToString();
     }
 
-    void GoToUrl()
-    {
-        NavManager.NavigateTo("/counters");
+    //public void NavTo(string url, string param1, string param2 = default, string param3 = default, bool forceload = false)
+    //{
+    //    NavManager.NavigateTo(url, forceload);
+    //}
 
-    }
-
-    void ChangeLayout()
-    {
-        if (RouteViewService.Layout == null)
-            RouteViewService.Layout = typeof(RedLayout);
-        else
-            RouteViewService.Layout = null;
-        RouteViewManager.Render();
-    }
-
-    void ThrowException()
-        => throw new NotImplementedException();
 }

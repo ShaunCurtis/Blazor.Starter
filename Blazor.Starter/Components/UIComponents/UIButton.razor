@@ -5,5 +5,9 @@
     [Parameter] public RenderFragment ChildContent { get; set; }
 
     private async Task BtnClick(MouseEventArgs e)
-        => await OnClick.InvokeAsync(e);
+        {
+        await InvokeAsync(StateHasChanged);
+    await OnClick.InvokeAsync(e);
+
+        }
 }

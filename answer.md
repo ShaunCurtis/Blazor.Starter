@@ -1,160 +1,73 @@
-Without re-writing the `RouteView` component and doing some big changes to the way Blazor components are loaded, you can't "Blank" the entire page.  Why would you.  The only time you get "blink" on the side menus/top bar is when you first load the SPA.  After that it only get re-rendered if you change the layout, and bits of it get rerendered when something changes - like login status,....
+There's a few misconceptions around the component lifecycle cycle and rendering. There's only one set-in-stone call to `StateHasChanged`.  This occurs at the completion of `SetParametersAsync` - the end of the synchronous part of the component refresh cycle.  There are two other conditional calls to `StateHasChanged`.  One is in initialization, and runs only when `OnInitializedAsync` yields but isn't complete.  The second is in parameter set and runs only if `OnParametersSetAsync` yields but isn't complete.  It's clearly stated in the Microsoft diagram, but I'm not sure most people understand it. [Ms Docs - Razor Component Lifecycle](https://docs.microsoft.com/en-us/aspnet/core/blazor/components/lifecycle?view=aspnetcore-5.0)
 
-Take a look at this.  It may or may not suit your needs.
 
-The basic premise is to replace the Layout with your own Layout component that only displays the layout when the main component sets a boolean parameter.
 
-Create a new Layout *LoaderLayout.razor* - basically just renders `@Body` - you can't set `@layout = null`.
-```html
-@inherits LayoutComponentBase
-@Body
+Controller Code:
+```csharp
+[MVC.Route("/api/weatherforecast/read")]
+[HttpPost]
+public async Task<WeatherForecast> Read([FromBody]int id) => await DataService.GetRecordAsync<WeatherForecast>(id);
 ```
 
-Create a `UILoader` component that is effectively your layout and manages what gets displayed.  I've created with the standard Blazor Layout.
-
-The razor code for *UILoader.razor*:
+API Data Service
+```csharp
+public override async Task<WeatherForecast> GetRecordAsync(int id)
+{
+    var response = await this.HttpClient.PostAsJsonAsync($"/api/weatherforecast/read", id);
+    var result = await response.Content.ReadFromJsonAsync<WeatherForecast>();
+    return result;
+}
 ```
-@inherits ComponentBase
-@if (this.Loaded)
-{
-    <div class="page">
-        <div class="sidebar">
-            <NavMenu />
-        </div>
 
-        <div class="main">
-            <div class="top-row px-4">
-                <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
-            </div>
+[Blazor CRUDL Database Template](https://github.com/ShaunCurtis/Blazor.Database)
 
-            <div class="content px-4">
-                @this.ChildContent
+`MyParameter` is extracted from the Route by the Router and passed into the page component as a Parameter in `SetParametersAsync`.  In theory you could put in on the setter for `MayParameter`.  Don't - this is very definitely not recommended practice.  Also, Lets say you're on "/mypage/1" and you navigate to "/mypage/2", `OnInitialized` won't be called.  you may think you're navigating between pages, but in reality, your just calling `SetParametersAsync` on the same component with a new value for `MyParamater`.
+
+Therefore something like: 
+```
+    protected override void OnParametersSet() 
+    {
+        if (!ViewModel.myParameter.Equals(myParameter)) ViewModel.myParameter = myParameter;
+    }
+```
+
+Will ensure it is set if it changes, otherwise not (I don't know what getters/setters are on `myParameter` and what changing it every time on `OnParametersSet` precipitates!).
+
+```
+<div>
+
+    <!-- ... -->
+
+    <div class="modal fade" id="id" tabindex="-1" aria-labelledby="label" aria-hidden="true">
+
+        <!-- ... -->
+        @if (showMessage) 
+            {
+            <div class="@css" role="alert">
+            @message
             </div>
-            <div class="px-4">
-                @this.Footer
-            </div>
-        </div>
+            }
+
+        <!-- ... -->
+
     </div>
-}
-else
-{
-    <div id="app">
-        <div class="mt-4" style="margin-right:auto; margin-left:auto; width:100%;">
-            <div class="loader"></div>
-            <div style="width:100%; text-align:center;"><h4>@Message</h4></div>
-        </div>
-    </div>
-}
+
+    <!-- ... -->
+
+</div>
 
 @code {
-    [Parameter] public RenderFragment ChildContent { get; set; }
+    private String resultMessage;
 
-    [Parameter] public RenderFragment Footer { get; set; }
+private bool showMessage = false;
+privare bool success = true;
+private string message = success ? "Query Saved": "Query Not Saved";
+private string css = success ? "alert alert-success": "alert alert-danger";
 
-    [Parameter] public bool Loaded { get; set; }
+    public void doSomething(){
 
-    [Parameter] public string Message { get; set; } = "Display Loading";
-}
-```
-
-The Component CSS to make it pretty - includes the MainLayout css
-
-```css
-*/ Copy into here the contents of mainlayout.razor.css/*
-*/ To big to show!/*
-
-.page-loader {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    z-index: 1;
-    width: 150px;
-    height: 150px;
-    margin: -75px 0 0 -75px;
-    border: 16px solid #f3f3f3;
-    border-radius: 50%;
-    border-top: 16px solid #3498db;
-    width: 120px;
-    height: 120px;
-    -webkit-animation: spin 2s linear infinite;
-    animation: spin 2s linear infinite;
-}
-
-.loader {
-    border: 16px solid #f3f3f3;
-    /* Light grey */
-    border-top: 16px solid #3498db;
-    /* Blue */
-    border-radius: 50%;
-    width: 120px;
-    height: 120px;
-    animation: spin 2s linear infinite;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-@-webkit-keyframes spin {
-    0% {
-        -webkit-transform: rotate(0deg);
-    }
-
-    100% {
-        -webkit-transform: rotate(360deg);
-    }
-}
-
-@keyframes spin {
-    0% {
-        transform: rotate(0deg);
-    }
-
-    100% {
-        transform: rotate(360deg);
+        success = is200Success;
+        showMessage = true;
     }
 }
 ```
-
-Now the test page.  Enclose all the code that depends on load completion inside the `UILoader` component.  I use async coding and a 2 second delay to emulate a slow data load.  You need to make sure all your data loading is done before changing `Loaded` to true.  `Reload` destroys all the components inside `UILoader` and renders new instances when Loaded is set back to true.  `LoadEverything` should call a loader in a service to get all the data all the components in the page need loaded before the root component sets `Loaded` to true.
-
-```razor
-@page "/loader"
-@layout LoaderLayout
-<UILoader Loaded="this.Loaded">
-    <ChildContent>
-        <h3>UILoader Test</h3>
-        <button class="btn btn-success" @onclick="Reload">Reload</button>
-    </ChildContent>
-    <Footer>
-        <div class="bg-primary text-white m-2 p-4">My Newsletter Data</div>
-    </Footer>
-</UILoader>
-
-@code {
-    private bool Loaded = false;
-
-    protected async override Task OnInitializedAsync()
-    {
-        await LoadEverything();
-        this.Loaded = true;
-    }
-
-    private async Task LoadEverything()
-    {
-        await Task.Delay(2000);
-        // make sure everything is loaded before completing i.e. returning a completed Task
-    }
-
-    private async Task Reload(MouseEventArgs e)
-    {
-        this.Loaded = false;
-        await InvokeAsync(StateHasChanged);
-        await LoadEverything();
-        this.Loaded = true;
-        await InvokeAsync(StateHasChanged);
-    }
-}
-```
-You can find:
-
- - [A Running demo on my demo site here](https://blazor-starter.azurewebsites.net/loader)
- - [My Test Repo with the code here](https://github.com/ShaunCurtis/Blazor.Starter)

@@ -1,22 +1,56 @@
 ﻿@page "/Test"
-
-@{ var x = 1;}
-@foreach (var c in Countries)
+@foreach (var country in Countries)
 {
-    <div> @x - @c</div>
+    <div><button class="btn btn-dark m-1" @onclick="() => OnClick(country.Id)">Edit</button>@country.Country</div>
+    <div><button class="btn btn-secondary m-1" @onclick="() => OnClick(country)">Edit</button>@country.Country</div>
+}
+@*---------------------------------------*@
+@{ int x = 0;}
+@foreach (var country in Countries)
+{
+    <div><button class="btn btn-danger m-1" @onclick="() => OnClick(x)">Edit</button>@country.Country</div>
     x++;
 }
+@*---------------------------------------*@
+@for (var i = 0; i < Countries.Count; i++)
+{
+    <div><button class="btn btn-danger m-1" @onclick="() => OnClick(i)">Edit</button> @Countries[i].Country</div>
+}
+
+@for (var i = 0; i < Countries.Count; i++)
+{
+    var item = Countries[i];
+    <div><button class="btn btn-success m-1" @onclick="() => OnClick(item.Id)">Edit</button> @item.Country</div>
+}
+<div>@_selected</div>
 
 @code {
 
-    private string _message = "Starting";
+    private string _selected = "None";
 
-    protected async override Task OnInitializedAsync()
+    class Model
     {
-        _message = "Sync Code running";
-        await Task.Delay(2000);
-        _message = "Async Code completed";
+        public int Id { get; set; }
+        public string Country { get; set; }
     }
 
-    private List<string> Countries => new List<string>() { "Adijan", "Lagos", "Tripoli" };
+    private Task OnClick(int id)
+    {
+        var x = id;
+        _selected = $"{id}";
+        return Task.CompletedTask;
+    }
+
+    private Task OnClick(Model country)
+    {
+        _selected = $"{country.Id}";
+        return Task.CompletedTask;
+    }
+
+    private List<Model> Countries => new List<Model>()
+{
+            new Model() { Id = 0, Country = "UK"},
+            new Model() { Id = 1, Country = "Spain"},
+            new Model() { Id = 2, Country = "Portugal"}
+    };
 }
