@@ -1,0 +1,30 @@
+﻿<h3>Shipping Address</h3>
+
+<input type="checkbox" @bind-value="@sameAsBillingAddress" /> Same as Billing Address
+<br />
+<textarea @bind="@OrderService.ShippingAddress" disabled="@sameAsBillingAddress" />
+<address>@OrderService.ShippingAddress</address>
+
+@code {
+
+    [Inject] OrderService OrderService { get; set; }
+
+
+    private bool sameAsBillingAddress
+    {
+        get => _sameAsBillingAddress;
+        set
+        {
+            if (value != _sameAsBillingAddress)
+            {
+                if (value)
+                    OrderService.ShippingAddress = OrderService.BillingAddress;
+                StateHasChanged();
+                _sameAsBillingAddress = value;
+            }
+        }
+    }
+
+    private bool _sameAsBillingAddress;
+
+}

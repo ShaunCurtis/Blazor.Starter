@@ -1,96 +1,94 @@
-You code doesn't take account of the fact that `MultiStepNavigation` is child content of `MultiStepComponent`.
+I think your answer over complicates this.
 
-Look in */obj/debug/net5.0/razor/...*, find your razor version of your component and look at the code.
+The code below demonstrates a basic setup (it's demo code not production).
 
-You probably need to do something like this:
+It uses the `EditForm` with a model.  There are radio buttons and checkboxes linked into a model that get updated correctly.  `Selected` has a setter so you can put a breakpoint in ans see who's being updated.
 
-```csharp
-private RenderFragment _MultiStepNavigationFragment => b =>
-{
-        b.OpenComponent<MultiStepNavigation>(0);
-        b.AddAttribute(1, "Name", "First Step");
-        b.CloseComponent();
-};
-```
+```c#
+@page "/"
+@using Blazor.Starter.Data
 
-```csharp
-private RenderFragment _MultiStepComponentFragment => b =>
-{
-        b.OpenComponent<MultiStepComponent>(0);
-        b.AddAttribute(1, "id", "MultiStepContainer");
-        b.AddAttribute(2, "ChildContent", this._MultiStepNavigationFragment);
-        b.CloseComponent();
-};
-```
+<EditForm EditContext="this.editContext">
 
-
-You state 
-> Now, the problem is that when I add new razor component and use AdminLayout.razor layout the view doesnot use css and js of _HostAdmin.cshtml.
-
-and I assume your question is "Why".
-
-You're adding a new razor component page to the existing application - probably with a route of something like "/admin/myadminpage". You are misunderstanding what's actually going on.
-
-*_Host.cshtml* loads the SPA, but that's the only get/post that happens.  Navigation after that is changing out components in the DOM.  Loading a component with the layout `AdminLayout` just changes out the Layout component.  There's no toing and froing with the server.
-
-What you are trying to do requires a reload of the SPA.  You could use:
-
-```
-NavigationManager.NavigateTo("/admin/myadminpage", true);
-```
-
-Also even if you do force a reload, the Fallbacks are in the wrong order - the default before the specific.
-```
-    endpoints.MapFallbackToPage("/_Host");
-    endpoints.MapFallbackToPage("~/Admin/{*clientroutes:nonfile}", "/_HostAdmin");
-```
-  
-Every event in the UI has two steps, the call to the event handler followed by a call to `StateHasChanged`.  If the event handler returns a `Task` then the caller waits on it's completion before calling `StateHasChanged`.  If it returns a `void` then `StateHasChanged` is called when the event handler yields (which may or may not be when it completes).
-
-Let's look at what you have set up.
-
-```
-<input @ref="input" class="in" type="text" @bind-value="@_command" @bind-value:event="oninput" @onkeypress="@(e => KeyPressed(e))">
-```
-
- 1. `input` value is wired to `_command` and set it to update every time the user enters a value (at every keystroke including an *enter*).  
-2. `onkeypress' is wired up `KeyPressed` to every keypress.  
- 
-You have two events kicking off whenever the user enters a value.
-
-Now to `KeyPressed`
-
-```
-    commandRunning = true;
-    await Task.Delay(1000);
-    commandRunning = false;
-
-    await input.FocusAsync();
-```
-
-The first await yields control back to the UI thread which almost certainly updates `_command` and fires `StateHasChanged` at the completion of that event.  With `Commandrunning` set to `false` the html elements are wiped out and cease to exist.  
-
-After the `TaskDelay` completes, `commandRunning` is set back to true.  You then try to set the focus to `input` which doesn't exist (the component hasn't been rerendered and input created).  Adding the `StateHasChanged` before `FocusAsync` re-renders the component, setting up all the html elements including `input`.
-After `KeyPressed` completes `StateHasChanged` is called by the orginating event (which doesn't do anything new).
-
-To ensure what you want to do works correctly:
-
-```
-    private async Task KeyPressed(KeyboardEventArgs args)
+    @foreach (var model in models)
     {
-        if (args.Key == "Enter")
-        {
-            commandRunning = true;
-            // make sure the UI has re-rendered and the html is destroyed
-            await InvokeAsync(StateHasChanged);
-            //  Do whatever you're doing
-            await Task.Delay(1000);
-            commandRunning = false;
-            // make sure the UI has re-rendered and the html is re-built
-            await InvokeAsync(StateHasChanged);
-            await input.FocusAsync();
-        }
-    }
-```
+        <h3>@model.Value</h3>
 
-A classic ASP.Net deals with page requests - here's what I want, get it, return the new page.  It's transactional, everything needs to happen before the end result gets returned to the browser.  You can pool/share/manage database connections....  With Blazor there's no longer a single transaction.  Multiple components on a page may be interacting with the database at the same time so there's potential a lot more independant async behaviour going.  Hence Blazor recommends using short lived contexts per component and the Factory.
+        <h5>Check boxes</h5>
+        foreach (var option in model.Options)
+        {
+            <div>
+                <InputCheckbox @bind-Value="option.Selected" />@option.Value
+            </div>
+        }
+        <h5>Option Select</h5>
+        <div>
+            <InputRadioGroup @bind-Value="model.Selected">
+                @foreach (var option in model.Options)
+                    {
+                    <div>
+                        <InputRadio Value="option.Value" /> @option.Value
+                    </div>
+                    }
+            </InputRadioGroup>
+            <div>
+                Selected: @model.Selected
+            </div>
+        </div>
+    }
+</EditForm>
+<button class="btn btn-dark" @onclick="OnClick">Check</button>
+
+@code {
+
+    private EditContext editContext;
+
+    private List<Model> models;
+
+    protected override Task OnInitializedAsync()
+    {
+        models = Models;
+        editContext = new EditContext(models);
+        return Task.CompletedTask;
+    }
+
+    public void OnClick(MouseEventArgs e)
+    {
+        var x = true;
+    }
+
+    public List<Model> Models => new List<Model>()
+    {
+        new Model() { Value = "Fred"},
+        new Model() { Value = "Jon"},
+     };
+
+
+    public class ModelOptions
+    {
+        public string Value { get; set; }
+        public bool Selected
+        {
+            get => _Selected;
+            set
+            {
+                _Selected = value;
+            }
+        }
+        public bool _Selected;
+    }
+
+    public class Model
+    {
+        public string Value { get; set; }
+        public string Selected { get; set; }
+        public List<ModelOptions> Options { get; set; } = new List<ModelOptions>()
+        {
+            new ModelOptions() {Value="Tea", Selected=true},
+            new ModelOptions() {Value="Coffee", Selected=false},
+            new ModelOptions() {Value="Water", Selected=false},
+
+        };
+    }
+}
+``` 

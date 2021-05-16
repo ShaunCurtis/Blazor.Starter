@@ -1,0 +1,286 @@
+﻿@page "/Blah"
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.Extensions.Logging
+@inject ILogger<Index> Logger
+
+
+<h1>Use Checkboxes and Radio Buttons in asp.net Blazor</h1>
+
+
+<h2>Checkboxes using a for-loop and a List of bool</h2>
+Don't tick the left column, as it generates an index out of bounds error.
+@for (int i = 0; i < CheckboxList.Count(); i++)
+{
+    // Gotcha: This is a closure, so the function call is stored together with the environment.
+    // Since i resides outside of the loop, it is a single variable which is stored with the function call, so
+    // index out of bound occurs because the last value is used. Instead, use a local variable, so for each
+    // iteration, a new variable is used and bound to the function. This is a compiler gotcha.
+    // Since C# 5.0, the loop variable of a foreach lop is inside the loop, so using foreach is save, but it
+    // does not work with a List<bool> but requires a List of objects than contains a bool as in
+    // foreach(bool items in CheckboxList), item is the iteration variable and cannot be assigned.
+    // https://ericlippert.com/2009/11/12/closing-over-the-loop-variable-considered-harmful-part-one/
+    // https://stackoverflow.com/questions/58843339/getting-argumentoutofrangeexception-using-for-loop-in-blazor-component
+    int ii = i;
+
+    <div class="form-check">
+        <input type="checkbox" @bind=@CheckboxList[i] /><!-- does not work, index out of range -->
+        <input type="checkbox" @bind=@CheckboxList[ii] />
+        <label>Answer @ii</label>
+    </div>
+}
+Checkbox selection for-loop: @OutTextCheckboxFor
+<hr />
+
+
+
+
+<h2>Checkboxes using a foreach-loop and a List&lt;Item&gt;</h2>
+@foreach (CheckboxItem item in CheckboxItems)
+{
+    <div class="form-check">
+        <input type="checkbox" @bind=@item.IsChecked />
+        <label>@item.Title</label>
+    </div>
+}
+Checkbox selection foreach-loop: @OutTextCheckboxForEach
+<hr />
+
+
+
+<h2> Does not work: Radio Buttons using a foreach-loop and a List&lt;Item&gt;</h2>
+Somehow it seems as if binding a radio button does not work the same way as binding a checkbox. I would expect
+that item.Ischecked is true/false, depending on the selection of the radio button.
+@foreach (RadioItemBool item in RadioItems)
+{
+    <div class="form-check">
+        @* would need to add value=, but can't as it is already assigned by bind?? *@
+        <input type="radio" @bind=@item.IsChecked />
+        <label>@item.Title</label>
+    </div>
+}
+Radio selection foreach-loop: @OutTextRadioForEach
+<hr />
+
+<button @onclick="OnSubmit">
+    Evaluate all the above
+</button>
+<hr />
+
+
+
+<h2>EditForm input with validation</h2>
+@* https://docs.microsoft.com/en-us/aspnet/core/blazor/forms-validation?view=aspnetcore-5.0
+    https://getbootstrap.com/docs/4.1/components/forms/ *@
+<EditForm Model="@formModel" OnValidSubmit="@HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group row">
+        <label for="ShortText" class="col-sm-2 col-form-label">Short Text</label>
+        <div class="col-sm-6">
+            <InputText @bind-Value="formModel.ShortText" class="form-control" id="ShortText" aria-describedby="ShortTextHelp"
+                       placeholder="Enter short text" />
+            <small id="ShortTextHelp" class="form-text text-muted">This is a required field.</small>
+        </div>
+    </div>
+
+
+    <div class="form-group row">
+        <label for="Text" class="col-sm-2 col-form-label">Text</label>
+        <div class="col-sm-10">
+            <InputTextArea @bind-Value="formModel.Text" class="form-control" id="Text" aria-describedby="TextHelp"
+                           placeholder="Enter text" />
+        </div>
+    </div>
+
+
+    <div class="form-group row">
+        <label for="Number" class="col-sm-2 col-form-label">Number</label>
+        <div class="col-sm-10">
+            <InputNumber @bind-Value="formModel.Integer" class="form-control" id="Number"
+                         placeholder="42" />
+        </div>
+    </div>
+
+
+    <div class="form-group row">
+        <label for="Checkboxes" class="col-sm-2 col-form-label">Checkbox</label>
+        <div id="Checkboxes" class="col-sm-10">
+            @for (int i = 0; i < formModel.IsCheckedComplex.Count; i++)
+            {
+                // prevent closures (IsCheckedComplex[ii] needs to be a loop-local variable)
+                int ii = i;
+
+                <div class="col-sm-10">
+                    @* Unfortunately, using @bind-value with a List<bool> does not work (see comment below *1) *@
+                    <InputCheckbox class="form-check-input" id="@ii" @bind-Value="@formModel.IsCheckedComplex[ii].IsChecked" />
+                    <label class="form-check-label" for=@ii>"Text for item"</label>
+                </div>
+            }
+        </div>
+    </div>
+
+
+    <div class="form-group row">
+        <label for="RadioButtons" class="col-sm-2 col-form-label">Radio buttons</label>
+        <div id="RadioButtons" class="col-sm-10">
+            <InputRadioGroup id="RadioButtons" @bind-Value=@formModel.SelectedRadio>
+                @foreach (var item in formModel.RadioItems)
+                {
+                    <div class="col-sm-10">
+                        <InputRadio class="form-check-input" id=@item.Index Value=@item.Index />
+                        <label class="form-check-label" for=@item.Index>@item.Title</label>
+                    </div>
+                }
+            </InputRadioGroup>
+        </div>
+    </div>
+
+
+    <div class="form-group row">
+        <div class="col-sm-10">
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+    </div>
+    <p>Inspect formModel in HandleValidSubmit() to see user inputs.</p>
+
+</EditForm>
+
+
+
+@code {
+
+    // could also use an array as a direct replacement for the list
+    // could also be a field instead of a property
+    public List<bool> CheckboxList { get; set; } = new List<bool> { true, false, true };
+
+    public List<CheckboxItem> CheckboxItems = new List<CheckboxItem>() {
+        new CheckboxItem(true, "Checkbox 1"), new CheckboxItem(false, "Checkbox 2"), new CheckboxItem(true, "Checkbox 3") };
+
+    public List<RadioItemBool> RadioItems = new()
+    {
+            new RadioItemBool(false, "Radio 1"),
+            new RadioItemBool(false, "Radio 2"),
+            new RadioItemBool(false, "Radio 3")
+        };
+
+
+    string OutTextCheckboxFor;
+    string OutTextCheckboxForEach;
+    string OutTextRadioForEach;
+
+
+    public class CheckboxItem
+    {
+        public bool IsChecked;
+        public string Title;
+        public CheckboxItem(bool isChecked, string title)
+        {
+            IsChecked = isChecked;
+            Title = title;
+        }
+    }
+
+    public class RadioItemBool
+    {
+        public bool IsChecked;
+        public string Title;
+        public RadioItemBool(bool isChecked, string title)
+        {
+            this.IsChecked = isChecked;
+            this.Title = title;
+        }
+    }
+
+
+
+    private FormModel formModel = new();
+
+
+    public class FormModel
+    {
+        public string Text { get; set; }
+
+        [Required]
+        [StringLength(10, ErrorMessage = "Short Text is too long.")]
+        public string ShortText { get; set; }
+
+
+        public int Integer { get; set; }
+
+        // === for the checkboxes
+
+        // unfortunately, binding to a List<bool> is not possible; try replacing IsCheckedComplex with IsChecked above *1
+        public List<bool> IsChecked { get; set; } = new() { true, false, false, true };
+        public List<myBool> IsCheckedComplex { get; set; } = new() { new(true), new(false), new(false), new(true) };
+
+
+        // a complex object is required as using List<bool> directly, throws an ArgumentException: The provided expression
+        // contains a InstanceMethodCallExpression1 which is not supported. FieldIdentifier only supports simple member
+        // accessors (fields, properties) of an object. See e.g. https://github.com/dotnet/aspnetcore/issues/12000
+        public class myBool
+        {
+            public bool IsChecked { get; set; }
+
+            public myBool(bool init)
+            {
+                IsChecked = init;
+            }
+
+        }
+
+
+        // === for the radio buttons
+
+        public int SelectedRadio = 2;
+
+        public class RadioItem
+        {
+            public int Index;
+            public string Title;
+            public RadioItem(int index, string title)
+            {
+                this.Index = index;
+                this.Title = title;
+            }
+        }
+
+        public List<RadioItem> RadioItems = new()
+        {
+                new RadioItem(1, "Radio 1"),
+                new RadioItem(2, "Radio 2"),
+                new RadioItem(3, "Radio 3")
+            };
+    }
+
+    // submit for the 'direct' input tags
+    public void OnSubmit()
+    {
+        OutTextCheckboxFor = "";
+        for (int i = 0; i < CheckboxList.Count(); i++)
+        {
+            OutTextCheckboxFor += " " + (CheckboxList[i] ? "1" : "0");
+        }
+
+        OutTextCheckboxForEach = "";
+        foreach (CheckboxItem item in CheckboxItems)
+        {
+            OutTextCheckboxForEach += " " + (item.IsChecked ? "1" : "0");
+        }
+
+        OutTextRadioForEach = "";
+        foreach (RadioItemBool item in RadioItems)
+        {
+            OutTextRadioForEach += " " + (item.IsChecked);
+        }
+    }
+
+
+    // submit for the EditForm
+    private void HandleValidSubmit()
+    {
+        Logger.LogInformation("HandleValidSubmit called");
+    }
+
+
+}

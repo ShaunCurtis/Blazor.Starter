@@ -34,6 +34,7 @@ namespace Blazor.Starter
             services.AddSingleton<BaseService>();
             services.AddScoped<RandomNumberService>();
             services.AddScoped<RouteViewService>();
+            services.AddScoped<OrderService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

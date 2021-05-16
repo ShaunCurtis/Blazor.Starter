@@ -1,0 +1,8 @@
+﻿<h3>Billing Address</h3>
+
+<textarea @bind="@OrderService.BillingAddress" />
+<address>@OrderService.BillingAddress</address>
+
+@code {
+    [Inject] OrderService OrderService { get; set; }
+}

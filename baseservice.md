@@ -1,51 +1,31 @@
-I think what you want is a Service.  
+You are trying to reload `roleList` in `OnAfterRenderAsync`.  The name of the method should be a bit of a give away.  **AFTERRENDER** means the component has already rendered and any changes only get into the UI when the component get re-rendered.  Add your `roleList` update to `DeleteRole`.  The component won't re-render till `DeleteRole` completes.
 
-Define a class 
+
 ```csharp
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace Blazor.Starter.Services
-{
-    public class BaseService
+public async Task DeleteRole(string roleId)
     {
-        public string Message { get; set; }
-    }
-}
-```
-
-Add it to services in startup/Program as a singleton
-
-```csharp
-        public void ConfigureServices(IServiceCollection services)
+        var role = await roleManager.FindByIdAsync(roleId);
+        bool confirmed = await jSRuntime.InvokeAsync<bool>("confirm", "Are you sure?");
+        if (confirmed)
         {
-            services.AddRazorPages();
-            services.AddServerSideBlazor();
-            services.AddSingleton<BaseService>();
+            var result = await roleManager.DeleteAsync(role);       
+            if (result.Succeeded)
+            {
+                MessageStaus.MessageId = 3;
+                // Added here to update roleList after it changes
+                roleList = mainService.GetAllRoles();
+            }
         }
+    }
 ```
 
-Display/Consume/set it it in any component/page
+You're binding to `@bind-Value="Skill.Name"` so I'm assuming `Skill` isn't null.  Your test is on `skill`, not `skill.name`, so as `skill` isn't `null` you hit the `else` option.  Try:
 
-```csharp
-<h3>@MyBase.Message</h3>
-
-@code {
-
-    [Inject] private BaseService MyBase { get; set; }
-
-    void ConsumerMethod()
-    {
-        var x = MyBase.Message;
-    }
-
-    void SetterMethod()
-    {
-        MyBase.Message = "Bonjour";
-    }
-}
 ```
+  @if (string.IsNullOrEmpty(skill.Name))
+    {
+        ......
+    }
 
-If you want to change it in one place and see it update somewhere else the you'll need to set up a notifier service
+However, you don't need to do any of this as the placeholder will only diplay when the field is empty.
+```

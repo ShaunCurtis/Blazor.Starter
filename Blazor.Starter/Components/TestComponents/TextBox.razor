@@ -1,7 +1,17 @@
-﻿<h3>@Value</h3>
+﻿@typeparam TItem
+<h3>@Value</h3>
+
+@foreach (var item in Data.Select(this.Property))
+{
+    <div>@item</div>
+}
 
 @code {
 
     [Parameter] public string Value { get; set; } = "Bonjour";
+
+    [Parameter] public Func<TItem, string> Property { get; set; }
+
+    [Parameter] public List<TItem> Data { get; set; }
 
 }
