@@ -1,56 +1,50 @@
-﻿@page "/Test"
-@foreach (var country in Countries)
-{
-    <div><button class="btn btn-dark m-1" @onclick="() => OnClick(country.Id)">Edit</button>@country.Country</div>
-    <div><button class="btn btn-secondary m-1" @onclick="() => OnClick(country)">Edit</button>@country.Country</div>
-}
-@*---------------------------------------*@
-@{ int x = 0;}
-@foreach (var country in Countries)
-{
-    <div><button class="btn btn-danger m-1" @onclick="() => OnClick(x)">Edit</button>@country.Country</div>
-    x++;
-}
-@*---------------------------------------*@
-@for (var i = 0; i < Countries.Count; i++)
-{
-    <div><button class="btn btn-danger m-1" @onclick="() => OnClick(i)">Edit</button> @Countries[i].Country</div>
-}
+﻿@page "/test"
+@using Blazor.Starter.Data
 
-@for (var i = 0; i < Countries.Count; i++)
-{
-    var item = Countries[i];
-    <div><button class="btn btn-success m-1" @onclick="() => OnClick(item.Id)">Edit</button> @item.Country</div>
-}
-<div>@_selected</div>
+<div>
+    <TextBox TItem="Model" Data="models" Property="item => item.modelType"></TextBox>
+</div>
+
+<div>
+    <TextBox TItem="Model" Data="models" Property="item => item.modelType"></TextBox>
+</div>
 
 @code {
 
-    private string _selected = "None";
-
-    class Model
+    public string GetProperty(Model model)
     {
-        public int Id { get; set; }
-        public string Country { get; set; }
+        return model.Value;
     }
 
-    private Task OnClick(int id)
-    {
-        var x = id;
-        _selected = $"{id}";
-        return Task.CompletedTask;
-    }
-
-    private Task OnClick(Model country)
-    {
-        _selected = $"{country.Id}";
-        return Task.CompletedTask;
-    }
-
-    private List<Model> Countries => new List<Model>()
+    public List<Model> models => new List<Model>()
 {
-            new Model() { Id = 0, Country = "UK"},
-            new Model() { Id = 1, Country = "Spain"},
-            new Model() { Id = 2, Country = "Portugal"}
-    };
+        new Model() { Value = "Fred", modelType=1, IsValid = true},
+        new Model() { Value = "Liz", modelType=2, IsValid = true},
+        new Model() { Value = "Bob", modelType=1, IsValid = true},
+        new Model() { Value = "Jane", modelType=2, IsValid = true},
+     };
+
+    public List<Model2> model2s => new List<Model2>()
+{
+        new Model2() { Value = "Fred", modelType=1, IsValid = true},
+        new Model2() { Value = "Liz", modelType=2, IsValid = true},
+        new Model2() { Value = "Bob", modelType=1, IsValid = true},
+        new Model2() { Value = "Jane", modelType=2, IsValid = true},
+     };
+
+
+    public class Model
+    {
+        public string Value { get; set; }
+        public int modelType { get; set; }
+        public bool IsValid { get; set; }
+    }
+
+    public class Model2
+    {
+        public string Value { get; set; }
+        public int modelType { get; set; }
+        public bool IsValid { get; set; }
+    }
+
 }

@@ -1,0 +1,25 @@
+﻿@using System;
+@using System.Linq.Expressions;
+
+<input value="@Value" @oninput="OnValueChanged" placeholder=@placeholderText class="form-control i-component o-my-4" />
+<ValidationMessage For="For" />
+
+@code {
+    [Parameter]
+    public string placeholderText { get; set; }
+
+    [Parameter] public Expression<Func<string>>? For { get; set; }
+
+    [Parameter]
+    public string Value { get; set; }
+
+    [Parameter]
+    public EventCallback<string> ValueChanged { get; set; }
+
+    private Task OnValueChanged(ChangeEventArgs e)
+    {
+        Value = e.Value.ToString();
+
+        return ValueChanged.InvokeAsync(Value);
+    }
+}

@@ -1,17 +1,14 @@
 ﻿@page "/EditorForm"
 <h3>EditForm</h3>
 
-<EditForm Model="model">
+<EditForm Model="model" @ref="this.editContext" >
+    <DataAnnotationsValidator></DataAnnotationsValidator>
     <div class="input-group mb-3">
         <div class="input-group-prepend">
-            <span class="input-group-text" id="inputGroupFileAddon01">Upload</span>
-        </div>
-        <div class="custom-file">
-            <InputFile class="custom-file-input"></InputFile>
-            <label class="custom-file-label" for="inputGroupFile01">Choose file</label>
+            <CustomInputText @bind-Value="model.Email" For="() => model.Email" />
         </div>
     </div>
-    <InputFile></InputFile>
+    <button class="btn btn-success" @onclick="Save">Submit</button>
 </EditForm>
 
 @code {
@@ -22,13 +19,22 @@
 
     public class Model
     {
+        [Required]
         public string Email { get; set; }
+
+        [Range(18, 80, ErrorMessage = "Age must be between 18 and 80.")]
+        public int Age { get; set; }
     }
+
+    private EditContext editContext;
+
 
     private Model model { get; set; } = new Model() { Email = "me@you.com" };
 
-    private void Save(EditContext editContext)
+    private void Save(MouseEventArgs e)
     {
+        FieldIdentifier fi = new FieldIdentifier(model: model, fieldName: "fieldName");
+        editContext.
         var x = true;
     }
 
