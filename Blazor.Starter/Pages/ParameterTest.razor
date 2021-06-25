@@ -1,0 +1,23 @@
+﻿@page "/parametertest"
+<h3>ParameterTest</h3>
+<ObjectParameter Value="model"></ObjectParameter>
+<SimpleParameter Value="@value"></SimpleParameter>
+<div>
+    <button class="btn btn-dark" @onclick="UpdateValue">Update</button>
+</div>
+
+@code {
+
+    private DataModel model { get; set; } = new DataModel();
+
+    private string value;
+
+    private int counter = 0;
+
+    void UpdateValue(MouseEventArgs e)
+    {
+        counter++;
+        value = $"Count {counter}";
+        this.model.Email = value;
+    }
+}

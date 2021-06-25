@@ -15,6 +15,13 @@ namespace Blazor.Starter.Services
             NotifyNumberChanged(rand.Next(0, 100));
         }
 
+        public void NewNumberWithoutEvent()
+        {
+            var rand = new Random();
+            _Value = rand.Next(0, 100);
+
+        }
+
         public void NotifyNumberChanged(int value)
         {
             if (!value.Equals(_Value))

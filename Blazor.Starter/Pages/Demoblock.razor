@@ -1,0 +1,59 @@
+﻿@page "/Demo"
+<h3>Demoblock</h3>
+@if (_loading)
+{
+    <div class="bg-warning p-2 m-2">Loading...</div>
+}
+else
+{
+    <div class="bg-success p-2 m-2">Loaded</div>
+}
+<div class="p-2 m-2">
+    <button class="btn btn-dark" @onclick="DoSearch">New Search</button>
+</div>
+@code
+{
+    private bool _loading;
+
+    private async Task Search()
+    {
+        //_loading = true;
+        // not needed
+        // StateHasChanged();
+        //Mails.Clear();
+        //Licenses.Clear();
+        //Callings.Clear();
+        //Supports.Clear();
+        //Leads.Clear();
+        //search();
+        //Emulate doing the above work
+        await Task.Delay(3000);
+        await Task.Yield();
+        DoThis();
+        //_loading = false;
+        // not needed
+        // StateHasChanged();
+    }
+
+    protected async override Task OnInitializedAsync()
+    {
+        await Search();
+    }
+
+    private async Task DoSearch(MouseEventArgs e)
+    {
+        await Search();
+    }
+
+    protected override bool ShouldRender()
+    {
+        return true;
+    }
+
+    private async Task DoThis()
+    {
+        await Task.Yield();
+    }
+
+}
+

@@ -10,6 +10,8 @@
         <div class="col-2">Number</div>
         <div class="col-2">@RdmService.Value</div>
         <div class="col-2"><button class="btn btn-secondary" @onclick="(e) => NewRandomNumber()">New Number</button></div>
+        <div class="col-2"><button class="btn btn-info" @onclick="(e) => NewRandomNumberWithoutEvent()">New Number</button></div>
+        <div class="col-2"><button class="btn btn-dark" @onclick="(e) => Render()">Render</button></div>
     </div>
     <div class="row bg-dark mt-2">
         <div class="col-3">
@@ -34,16 +36,35 @@
 </div>
 
 <ValueDisplay Title="Unwired Display"></ValueDisplay>
+<ValueDisplay Title="Unwired Display with Value" Value="RdmService.Value"></ValueDisplay>
 <ValueDisplay WireEvent="true" Title="Wired Display"></ValueDisplay>
 <ValueDisplay Value="RdmService.Value" Title="Parameter Display"></ValueDisplay>
+<ObjectDisplay Model="@model"></ObjectDisplay>
+<ObjectTest Model="model"></ObjectTest>
+<ObjectTest Value="RdmService.Value"></ObjectTest>
 
 @code {
     private string Title = "Root";
 
     [Inject] private RandomNumberService RdmService { get; set; }
 
+    private DataModel model { get; set; } = new DataModel();
+
     private void NewRandomNumber()
-        => RdmService.NewNumber();
+    {
+        RdmService.NewNumber();
+        model.Value = RdmService.Value;
+    }
+
+    private void NewRandomNumberWithoutEvent()
+    {
+        RdmService.NewNumberWithoutEvent();
+        model.Value = RdmService.Value;
+    }
+
+    private void Render()
+    {
+    }
 
     private int InitRun = 0;
     private int ParamsSetRun = 0;

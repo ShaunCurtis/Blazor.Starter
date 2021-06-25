@@ -1,26 +1,32 @@
 ﻿@page "/basiceditor"
 <BasicEditorCard EditContext="_EditContext" OnValidSubmit="ValidatedSubmit">
-    <InputText @bind-Value="model.Email"></InputText>
+    <input type="text" @bind-value="model.Value" />
 </BasicEditorCard>
-
-<BasicEditorCard1 Model="model" OnValidSubmit="ValidatedSubmit">
-    <InputText @bind-Value="model.Email"></InputText>
-</BasicEditorCard1>
-
-<div>@message</div>
 
 @code {
 
     public class Model
     {
         public string Email { get; set; }
+
+        public string Value
+        {
+            get => _value != 0 ? _value.ToString() : string.Empty;
+            set
+            {
+                if (int.TryParse(value, out int pvalue))
+                    _value = pvalue;
+                else
+                    _value = 0;
+            }
+        }
+
+        private int _value;
     }
 
     private EditContext _EditContext;
 
     private Model model { get; set; } = new Model() { Email = "me@you.com" };
-
-    private string message = "Not yet clicked";
 
     protected override Task OnInitializedAsync()
     {
@@ -28,9 +34,15 @@
         return base.OnInitializedAsync();
     }
 
+    private Task ValidateSubmit()
+    {
+        if (_EditContext.Validate())
+            return Task.CompletedTask;
+        return Task.CompletedTask;
+    }
+
     private Task ValidatedSubmit(EditContext editContext)
     {
-        message = $"clicked at {DateTime.Now.ToLongTimeString()}";
         return Task.CompletedTask;
     }
 }

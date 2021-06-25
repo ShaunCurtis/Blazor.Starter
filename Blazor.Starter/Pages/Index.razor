@@ -1,110 +1,113 @@
 ﻿@page "/"
-@using Blazor.Starter.Data
 
+<h2>Home Page</h2>
 <EditForm EditContext="this.editContext">
-
-    @foreach (var model in models)
+    @foreach (var modelData in _model.data)
     {
-        <h3>@model.Value</h3>
-
-        <h5>Check boxes</h5>
-        foreach (var option in model.Options)
-        {
-            <div>
-                <InputCheckbox @bind-Value="option.Selected" />@option.Value
-            </div>
-        }
-        <h5>Option Select</h5>
         <div>
-            <InputRadioGroup @bind-Value="model.Selected">
-                @foreach (var option in model.Options)
-                    {
-                    <div>
-                        <InputRadio Value="option.Value" /> @option.Value
-                    </div>
-                    }
-            </InputRadioGroup>
-            <div>
-                Selected: @model.Selected
-            </div>
+            <InputNumber @bind-Value="modelData.Amount"></InputNumber>
+        </div>
+        <div>
+            Value: @modelData.Amount
         </div>
     }
 </EditForm>
 
-<button class="btn btn-dark" @onclick="OnClick">Check</button>
+<input type="text" name="name" value="@_someField" />
+
+<button type="button" @onclick="UpdateSomeField">Update</button>
+
+<button type="button" @onclick="SetCss">SetCss</button>
+
+<div class="scroll" @onscroll="OnScroll">
+    It is a good platform to learn programming.
+    It is an educational website. Prepare for the Recruitment drive
+    of product based companies like Microsoft, Amazon, Adobe etc with
+    a free online placement preparation course. The course focuses
+    on various MCQ's & Coding question likely to be asked in the
+    interviews & make your upcoming placement season efficient and
+    successful. Also, any geeks can help other geeks by writing
+    articles on the GeeksforGeeks, publishing articles follow few
+    steps that are Articles that need little modification/improvement
+    from reviewers are published first. To quickly get your articles
+    reviewed, please refer existing articles, their formatting style,
+    coding style, and try to make you are close to them. In case you
+    are a beginner, you may refer Guidelines to write an Article
+</div>
+
+<BaseModalDialog @ref="Modal"></BaseModalDialog>
+
+<style>
+    h1 {
+        color: Green;
+    }
+
+    div.scroll {
+        margin: 4px, 4px;
+        padding: 4px;
+        width: 500px;
+        height: 110px;
+        overflow-x: hidden;
+        overflow-y: auto;
+        text-align: justify;
+    }
+</style>
 
 @code {
 
-    private List<bool> bools = new List<bool>()
-    {
-        true,
-        false,
-        false
-    };
+    [Inject] private IJSRuntime _js { get; set; }
 
-    private EditContext editContext;
+    private BaseModalDialog Modal { get; set; }
 
-    private List<Model> models;
+    private string _someField;
 
-    protected override Task OnInitializedAsync()
-    {
-        models = Models;
-        models[0].bools = new List<bool>()
-    {
-        true,
-        false,
-        false
-    };
-        models[1].bools = new List<bool>()
-    {
-        true,
-        false,
-        false
-    };
-        editContext = new EditContext(models);
-        return Task.CompletedTask;
-    }
+    private string someField;
 
-    public void OnClick(MouseEventArgs e)
-    {
-        var x = true;
-    }
-
-    public List<Model> Models => new List<Model>()
-    {
-        new Model() { Value = "Fred"},
-        new Model() { Value = "Jon"},
-     };
-
-    public class ModelOptions
-    {
-        public string Value { get; set; }
-        public bool Selected
+    private void OnScroll()
         {
-            get => _Selected;
-            set
-            {
-                _Selected = value;
-            }
+        var x = true;
         }
-        public bool _Selected;
+
+    private void UpdateSomeField()
+    {
+        someField = _someField;
+        // Update Database
     }
 
-    public Model _model = new Model() { Value = "John" };
+    private bool _isbodyCss;
+
+    private string _bodyCss => _isbodyCss ? "Theme-Dark" : "Theme-Light";
+
+    public async Task SetCss()
+    {
+        var appJsInterop = new AppJsInterop(_js);
+        await appJsInterop.SetBodyCss("BlazorMainBody", _bodyCss);
+        _isbodyCss = !_isbodyCss;
+    }
+
+    public class ModelData
+    {
+        public int Amount { get; set; }
+    }
 
     public class Model
     {
-        public string Value { get; set; }
-        public string Selected { get; set; }
-        public string Name { get; set; }
-        public List<bool> bools { get; set; }
-
-        public List<ModelOptions> Options { get; set; } = new List<ModelOptions>()
-        {
-            new ModelOptions() {Value="Tea", Selected=true},
-            new ModelOptions() {Value="Coffee", Selected=false},
-            new ModelOptions() {Value="Water", Selected=false},
+        public List<ModelData> data = new List<ModelData> {
+            new ModelData { Amount = 12},
+            new ModelData { Amount = 10},
+            new ModelData { Amount = 8},
+            new ModelData { Amount = 6},
         };
+    }
+
+    private EditContext editContext;
+
+    protected Model _model { get; set; } = new Model();
+
+    protected override Task OnInitializedAsync()
+    {
+        editContext = new EditContext(_model);
+        return base.OnInitializedAsync();
     }
 
 }

@@ -38,11 +38,11 @@
 
     [Parameter] public bool WireEvent { get; set; }
 
-    [Parameter] public string Title { get; set; }
+    [Parameter] public string Title { get; set; } = "Object Display";
 
-    [Parameter] public int Value { get; set; } = 0;
+    [Parameter] public DataModel Model { get; set; }
 
-    private int displayValue => this.Value > 0 ? this.Value : RdmService.Value;
+    private int displayValue => this.Model?.Value ?? 0;
 
     private void NewRandomNumber()
         => RdmService.NewNumber();

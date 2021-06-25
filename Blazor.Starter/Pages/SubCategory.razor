@@ -1,0 +1,88 @@
+﻿@page "/subcategory"
+<h3>SubCategory</h3>
+
+<span>Continent/Country</span>
+<select @bind="Continent" placeholder="Choose a Continent">
+    @foreach (var continent in Continents)
+    {
+        <option value="@continent">@continent</option>
+    }
+</select>
+
+@if (Countries.Count > 0)
+{
+<select @bind="_country">
+    <option value="">Select a Country</option>
+    @foreach (var country in Countries)
+    {
+        <option value="@country">@country</option>
+    }
+</select>
+}
+<div class="m-3">Country Selected: @_country</div>
+
+@code {
+
+    class Model
+    {
+        public string Country { get; set; }
+
+        public string Continent { get; set; }
+    }
+
+    List<Model> models = new List<Model>()
+{
+        new Model {Country = "UK", Continent = "Europe"},
+        new Model {Country = "Spain", Continent = "Europe"},
+        new Model {Country = "Portugal", Continent = "Europe"},
+        new Model {Country = "Thailand", Continent = "Asia"},
+        new Model {Country = "Singapore", Continent = "Asia"},
+        new Model {Country = "Brazil", Continent = "South America"},
+        new Model {Country = "Chile", Continent = "South America"},
+    };
+
+    IEnumerable<string> Continents
+        => models.Select(item => item.Continent).Distinct();
+
+    List<string> Countries
+        => models.Where(item => item.Continent.Equals(_continent)).Select(item => item.Country).ToList() ?? new List<string>();
+
+    string Continent
+    {
+        get => _continent;
+        set
+        {
+            if (!_continent.Equals(value))
+            {
+                _continent = value;
+                _country = string.Empty;
+            }
+        }
+    }
+
+    string Country
+    {
+        get => _country;
+        set
+        {
+            if (!_country.Equals(value))
+            {
+                _country = value;
+                // do whatever
+            }
+        }
+    }
+
+    string _continent = string.Empty;
+
+    string _country = string.Empty;
+
+    protected override Task OnInitializedAsync()
+    {
+        // Do what initializing you need to do here
+        return base.OnInitializedAsync();
+    }
+
+
+
+}

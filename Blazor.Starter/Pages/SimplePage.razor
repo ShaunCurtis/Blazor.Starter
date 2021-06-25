@@ -1,0 +1,37 @@
+﻿@page "/simple"
+<h3>SimplePage</h3>
+@if (loaded)
+{
+    <SimpleComponent>
+        @_childContent
+    </SimpleComponent>
+}
+else
+{
+    <div class="h4 bg-danger text-white p-2">Loading.....</div>
+}
+
+@code {
+
+    private bool loaded;
+
+    protected async override Task OnInitializedAsync()
+    {
+        await Task.Delay(2000);
+        loaded = true;
+    }
+
+    protected void ButtonClick(MouseEventArgs e)
+    {
+        var x = true;
+    }
+
+    private RenderFragment _childContent => (builder) =>
+    {
+        builder.OpenElement(0, "button");
+        builder.AddAttribute(1, "class", "btn btn-primary");
+        builder.AddAttribute(2, "onclick", EventCallback.Factory.Create<MouseEventArgs>(this, ButtonClick));
+        builder.AddContent(3, "Click Me");
+        builder.CloseElement();
+    };
+}

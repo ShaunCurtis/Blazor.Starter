@@ -1,0 +1,30 @@
+﻿@page "/MultiSelect"
+<h3>MultSelect</h3>
+<div class="form-group col-md-6">
+    <label for="dur">Duration</label>
+    <select @bind="Duration" class="custom-select" id="dur" multiple>
+        <option value="12" selected>One Year</option>
+        <option value="24">Two Year</option>
+        <option value="36">Three Year</option>
+        <option value="48">Four year</option>
+        <option value="60">Five Year</option>
+    </select>
+    <small class="form-text text-muted">Hold <b>'CTRL'</b> to select multiple.</small>
+</div>
+
+@code {
+
+    private string _Duration;
+
+    private string Duration
+    {
+        get => _Duration;
+        set
+        {
+            if (value != _Duration)
+            {
+                _Duration = value;
+            }
+        }
+    }
+}

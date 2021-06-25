@@ -1,0 +1,54 @@
+﻿@page "/Select"
+<h3>Select</h3>
+
+<div class="form-group col-md-6">
+    <label for="dur">Duration</label>
+    <select class="custom-select" @onchange="this.SelectChanged">
+        <option disabled value="-1" selected>Select an Option</option>
+        @foreach (var kvp in SelectData)
+        {
+            <option value="@kvp.Key">@kvp.Value</option>
+        }
+    </select>
+</div>
+<div class="p-2 m-2">
+    Current Key : @_Duration
+</div>
+<div class="p-2 m-2">
+    Current Value : @_DurationValue
+</div>
+
+
+    @code {
+        private string _Duration;
+
+        private string _DurationValue;
+
+        private string Duration
+        {
+            get => _Duration;
+            set
+            {
+                if (value != _Duration)
+                {
+                    _Duration = value;
+                }
+            }
+        }
+
+        private void SelectChanged(ChangeEventArgs e)
+        {
+            var x = true;
+            _Duration = e.Value.ToString();
+            if (int.TryParse(e.Value.ToString(), out int value))
+                _DurationValue = SelectData[value];
+
+        }
+
+        private Dictionary<int, string> SelectData = new Dictionary<int, string>()
+{
+        { 11746, "No"},
+        { 11747, "Provision Only"},
+        { 11748, "Full Installation"}
+    };
+    }

@@ -1,0 +1,26 @@
+﻿<div class="h4 bg-success text-white p-2"  @attributes="@CapturedAttributes" disabled="@false">
+    <div><input type="text" @attributes="@CapturedAttributes" /></div>
+    @ChildContent
+</div>
+
+@code {
+
+    [Parameter] public RenderFragment ChildContent { get; set; }
+
+    [Parameter(CaptureUnmatchedValues = true)]
+    public Dictionary<string, object> CapturedAttributes { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        if (CapturedAttributes is null) CapturedAttributes = new Dictionary<string, object>(); 
+        CapturedAttributes.Add("disabled", true);
+        base.OnParametersSet();
+    }
+
+        public override Task SetParametersAsync(ParameterView parameters)
+        {
+        parameters.SetParameterProperties(this);
+            return base.SetParametersAsync(ParameterView.Empty); 
+        }
+
+}

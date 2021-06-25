@@ -1,0 +1,39 @@
+﻿<h3>PseudoEditor</h3>
+
+<div> DATA</div>
+
+<div class="p-2 m-2 text-right">
+    <button class="btn @this._editButtonColour" @onclick="this.SetToEdit">@this._editButtonText</button>
+    <button disabled="@(!this._isDirty)" class="btn btn-success" @onclick="this.Save">Save</button>
+    <button disabled="@(this._isDirty)" class="btn btn-dark" @onclick="this.Close">Close</button>
+</div>
+
+@code {
+    [CascadingParameter]
+    public IModalDialog Modal { get; set; }
+
+    private bool _isModal => this.Modal != null;
+
+    private bool _isDirty;
+
+    private string _editButtonColour => _isDirty ? "btn-danger" : "btn-success";
+
+    private string _editButtonText => _isDirty ? "Set To Clean" : "Set To Dirty";
+
+    private void SetToEdit()
+    {
+        _isDirty = !_isDirty;
+        if (_isModal)
+            this.Modal.Lock(_isDirty);
+    }
+
+    private void Save(MouseEventArgs e)
+    {
+        this.Modal.Close(ModalResult.OK());
+    }
+
+    public void Close(MouseEventArgs e)
+    {
+        this.Modal.Close(ModalResult.OK());
+    }
+}

@@ -1,5 +1,34 @@
 ﻿<h3>HelloUniverse</h3>
 
-@code {
+@if (_isModal)
+{
+    <div class="m-2 p-2">
+        <button class="btn btn-warning" @onclick="Lock">Lock/Unlock</button>
+    </div>
+    <div class="m-2 p-2">
+        <button class="btn btn-dark" @onclick="Close">Exit</button>
+    </div>
+}
 
+@code {
+    [CascadingParameter] IModalDialog Modal { get; set; }
+
+    private bool _isModal => Modal != null;
+
+    private bool locked;
+
+    private void Close(MouseEventArgs e)
+    {
+        if (_isModal)
+            Modal.Close(ModalResult.OK());
+    }
+
+    private void Lock(MouseEventArgs e)
+    {
+        if (_isModal)
+        {
+            locked = !locked;
+            Modal.Lock(locked);
+        }
+    }
 }

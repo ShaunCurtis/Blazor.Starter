@@ -1,58 +1,69 @@
-The error you report is ` Delegate 'Func<Pen, int, stirng>' doest not take 1 arguement`  yet Property  is `Func<TItem, string>`.
+Add a JS file. 
 
-`Func<TItem, string> Property` says I want a function that looks like this `string MyMethod(TItem item)`.  Your anonymous function is `pen => pen.PenNumber`, Property expecting `pen.PenNumber` is string.  Is it?
+*site.js*
+```
 
-Here's a simplified working version of what you are doing:
+window.SetBodyCss = function (elementId, classname) {
+    var link = document.getElementById(elementId);
+    if (link !== undefined) {
+        link.className = classname;
+    }
+    return true;
+}
+```
 
-#### TextBox.razor
-```razor
-@typeparam TItem
-<h3>@Value</h3>
+Reference it in _Host.cshtml_.  
+Create an `id` on `<body>`.
 
-@foreach (var item in Data.Select(this.Property))
+```
+<body id="BlazorMainBody">
+
+    <script src="/site.js"></script>
+    <script src="_framework/blazor.server.js"></script>
+</body>
+```
+
+Add a helper class 
+```
+using Microsoft.JSInterop;
+using System.Threading.Tasks;
+
+namespace Blazor.Starter
 {
- <div>@item</div>
+    public class AppJsInterop
+    {
+        protected IJSRuntime JSRuntime { get; }
+
+        public AppJsInterop(IJSRuntime jsRuntime)
+        {
+            JSRuntime = jsRuntime;
+        }
+
+        public ValueTask<bool> SetBodyCss(string elementId, string cssClass)
+          => JSRuntime.InvokeAsync<bool>("SetBodyCss", elementId, cssClass);
+    }
 }
+```
+
+This shows toggling it in a page
+
+```
+<button type="button" @onclick="SetCss">SetCss</button>
 
 @code {
-    [Parameter] public string Value { get; set; } = "Bonjour";
-    [Parameter] public Func<TItem, string> Property { get; set; }
-    [Parameter] public List<TItem> Data { get; set; }
-}
-```
+    [Inject] private IJSRuntime _js { get; set; }
 
-#### Index.razor
-```
-@page "/"
-@using Blazor.Starter.Data
+    private bool _isbodyCss;
 
-<div>
-    <TextBox TItem="Model" Data="models" Property="item => item.Value"></TextBox>
-</div>
+    private string _bodyCss => _isbodyCss ? "Theme-Dark" : "Theme-Light";
 
-@code {
-
-    public string GetProperty(Model model)
+    private async Task SetCss()
     {
-        return model.Value;
-    }
-
-    public Model GetProperty1()
-    {
-        return new Model();
-    }
-
-    public List<Model> models => new List<Model>()
-    {
-        new Model() { Value = "Fred"},
-        new Model() { Value = "Jon"},
-        new Model() { Value = "Bob"},
-     };
-
-
-    public class Model
-    {
-        public string Value { get; set; }
+        var appJsInterop = new AppJsInterop(_js);
+        await appJsInterop.SetBodyCss("BlazorMainBody", _bodyCss);
+        _isbodyCss = !_isbodyCss;
     }
 }
 ```
+
+You can change out the whole stylesheet in a similar way - see this [note of mine](https://shauncurtis.github.io/posts/DynamicCss.html)

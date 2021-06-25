@@ -1,50 +1,41 @@
-﻿@page "/test"
-@using Blazor.Starter.Data
+﻿@page "/modal"
 
-<div>
-    <TextBox TItem="Model" Data="models" Property="item => item.modelType"></TextBox>
+<div class="m-2 p-2">
+    <button class="btn btn-primary" @onclick="GetYesNo">Open</button>
 </div>
 
-<div>
-    <TextBox TItem="Model" Data="models" Property="item => item.modelType"></TextBox>
+<div class="m-2 p-2">
+    <button class="btn btn-info" @onclick="GetEditor">Open Editor</button>
 </div>
 
-@code {
+<div class="m-2 p-2">
+    <button class="btn btn-dark" @onclick="GetCounter">Get FetchData</button>
+</div>
 
-    public string GetProperty(Model model)
+<BaseModalDialog @ref="this.Modal"></BaseModalDialog>
+@code
+{
+    private BaseModalDialog Modal { get; set; }
+
+    private void GetEditor(MouseEventArgs e)
     {
-        return model.Value;
+        var options = new ModalOptions();
+        options.Set(ModalOptions.__ExitOnBackGroundClick, true);
+        Modal.ShowAsync<PseudoEditor>(options);
     }
 
-    public List<Model> models => new List<Model>()
-{
-        new Model() { Value = "Fred", modelType=1, IsValid = true},
-        new Model() { Value = "Liz", modelType=2, IsValid = true},
-        new Model() { Value = "Bob", modelType=1, IsValid = true},
-        new Model() { Value = "Jane", modelType=2, IsValid = true},
-     };
-
-    public List<Model2> model2s => new List<Model2>()
-{
-        new Model2() { Value = "Fred", modelType=1, IsValid = true},
-        new Model2() { Value = "Liz", modelType=2, IsValid = true},
-        new Model2() { Value = "Bob", modelType=1, IsValid = true},
-        new Model2() { Value = "Jane", modelType=2, IsValid = true},
-     };
-
-
-    public class Model
+    private void GetYesNo(MouseEventArgs e)
     {
-        public string Value { get; set; }
-        public int modelType { get; set; }
-        public bool IsValid { get; set; }
+        var options = new ModalOptions();
+        options.Set("Message", "<h2>Hello There</h2>");
+        Modal.ShowAsync<YesNo>(options);
     }
 
-    public class Model2
+    private void GetCounter(MouseEventArgs e)
     {
-        public string Value { get; set; }
-        public int modelType { get; set; }
-        public bool IsValid { get; set; }
+        var options = new ModalOptions();
+        options.Set(ModalOptions.__ExitOnBackGroundClick, true);
+        Modal.ShowAsync<FetchData>(options);
     }
 
 }

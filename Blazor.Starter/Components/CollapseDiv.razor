@@ -1,0 +1,21 @@
+﻿<div @onclick="Collapse" style="cursor:pointer;" >
+    <h2>@Label</h2>
+</div>
+@if (!Collapsed)
+{
+    <div>@ChildContent</div>
+}
+
+@code {
+
+    [Parameter] public RenderFragment ChildContent { get; set; }
+
+    [Parameter] public RenderFragment Label { get; set; }
+
+    bool Collapsed;
+
+    void Collapse(MouseEventArgs e)
+    {
+        Collapsed = !Collapsed;
+    }
+}

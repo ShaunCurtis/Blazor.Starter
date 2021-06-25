@@ -1,15 +1,8 @@
-﻿@implements IDisposable
-
+﻿<h3>NumberDispay</h3>
 <div class="container m-2 px-3 p-t bg-info text-white">
-    <div class="row">
-        <div class="col-12">
-            <h3>@this.Title</h3>
-        </div>
-    </div>
     <div class="row">
         <div class="col-2">Number</div>
         <div class="col-2">@this.displayValue</div>
-        <div class="col-2"><button class="btn btn-secondary" @onclick="(e) => NewRandomNumber()">New Number</button></div>
     </div>
     <div class="row bg-dark mt-2">
         <div class="col-3">
@@ -32,27 +25,20 @@
         </div>
     </div>
 </div>
+@ChildContent
+
+
 
 @code {
+
     [Inject] private RandomNumberService RdmService { get; set; }
 
-    [Parameter] public bool WireEvent { get; set; }
+    private int displayValue => RdmService.Value;
 
-    [Parameter] public string Title { get; set; }
-
-    [Parameter] public int Value { get; set; } = 0;
-
-    private int displayValue => this.Value > 0 ? this.Value : RdmService.Value;
-
-    private void NewRandomNumber()
-        => RdmService.NewNumber();
-
+    [Parameter] public RenderFragment ChildContent { get; set; }
     protected override Task OnInitializedAsync()
     {
         this.InitRun++;
-        if (this.WireEvent)
-            this.RdmService.NumberChanged += this.OnNumberChange;
-
         return base.OnInitializedAsync();
     }
 
@@ -75,9 +61,4 @@
         return true;
     }
 
-    public void Dispose()
-    {
-        if (this.WireEvent)
-            this.RdmService.NumberChanged -= this.OnNumberChange;
-    }
 }

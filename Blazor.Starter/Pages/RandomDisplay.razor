@@ -1,14 +1,13 @@
-﻿@implements IDisposable
-
-<div class="container m-2 px-3 p-t bg-info text-white">
+﻿@page "/randomdisplay"
+<div class="container m-2 px-3 p-t bg-primary text-white">
     <div class="row">
         <div class="col-12">
-            <h3>@this.Title</h3>
+            <h3>Random Test</h3>
         </div>
     </div>
     <div class="row">
         <div class="col-2">Number</div>
-        <div class="col-2">@this.displayValue</div>
+        <div class="col-2">@RdmService.Value</div>
         <div class="col-2"><button class="btn btn-secondary" @onclick="(e) => NewRandomNumber()">New Number</button></div>
     </div>
     <div class="row bg-dark mt-2">
@@ -33,35 +32,37 @@
     </div>
 </div>
 
+<NumberDispay @ref="numberDispay1">
+</NumberDispay>
+
+<NumberDispay>
+    <NumberDispay>
+    </NumberDispay>
+</NumberDispay>
+
+<NumberDispay>
+    <NumberDispay>
+    </NumberDispay>
+</NumberDispay>
+
 @code {
+
     [Inject] private RandomNumberService RdmService { get; set; }
 
-    [Parameter] public bool WireEvent { get; set; }
-
-    [Parameter] public string Title { get; set; }
-
-    [Parameter] public int Value { get; set; } = 0;
-
-    private int displayValue => this.Value > 0 ? this.Value : RdmService.Value;
+    private NumberDispay numberDispay1 { get; set; }
 
     private void NewRandomNumber()
         => RdmService.NewNumber();
 
-    protected override Task OnInitializedAsync()
-    {
-        this.InitRun++;
-        if (this.WireEvent)
-            this.RdmService.NumberChanged += this.OnNumberChange;
-
-        return base.OnInitializedAsync();
-    }
-
-    private async void OnNumberChange(object sender, EventArgs e)
-        => await this.InvokeAsync(StateHasChanged);
-
     private int InitRun = 0;
     private int ParamsSetRun = 0;
     private int Rendered = 1;
+
+    protected override Task OnInitializedAsync()
+    {
+        InitRun++;
+        return base.OnInitializedAsync();
+    }
 
     protected override Task OnParametersSetAsync()
     {
@@ -75,9 +76,4 @@
         return true;
     }
 
-    public void Dispose()
-    {
-        if (this.WireEvent)
-            this.RdmService.NumberChanged -= this.OnNumberChange;
-    }
 }

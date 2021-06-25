@@ -1,0 +1,96 @@
+﻿@page "/editortest"
+<h3>EditorTest</h3>
+<CascadingValue Value="model">
+    <EditForm EditContext="editContext">
+        <EditFormState @ref="editFormState" EditStateChanged="EditStateChanged"></EditFormState>
+        <div>
+            Email: <InputText @bind-Value="model.Email"></InputText>
+        </div>
+        <AddressEditor></AddressEditor>
+        <div>
+            Address: @model.Address
+        </div>
+    </EditForm>
+</CascadingValue>
+
+@*@for (var counter = 0; counter < this.myList.Count; counter++)
+{
+    var item = this.myList[counter];
+    <button class="btn btn-dark m-3" @onclick="() => ButtonClick(item)">@item</button>
+}
+
+@for (var counter = 0; counter < this.myList.Count; counter++)
+{
+    var item = this.myList[counter];
+    var thiscount = counter;
+    <button class="btn btn-info m-3" @onclick="() => ButtonClick(thiscount)">@item</button>
+}
+
+@foreach (var item in this.myList)
+{
+    <button class="btn btn-primary m-3" @onclick="() => ButtonClick(item)">@item</button>
+}
+<div>Value = @this.value </div>*@
+
+@Iterator
+
+@code {
+
+    private DataModel model { get; set; } = new DataModel();
+
+    private EditFormState editFormState;
+
+    private EditContext editContext;
+
+    protected override Task OnInitializedAsync()
+    {
+        this.editContext = new EditContext(model);
+        return base.OnInitializedAsync();
+    }
+
+    private void EditStateChanged(bool editState)
+    {
+        StateHasChanged();
+    }
+
+    private List<int> myList => new List<int> { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+    private int value;
+
+    private Task ButtonClick(int value)
+    {
+        this.value = value;
+        return Task.CompletedTask;
+    }
+
+    [Parameter] public int MyParameter { get; set; }
+    private int _MyParameter;
+    public event EventHandler MyParameterChanged;
+
+    public override Task SetParametersAsync(ParameterView parameters)
+    {
+        parameters.SetParameterProperties(this);
+        if (!_MyParameter.Equals(MyParameter))
+        {
+            _MyParameter = MyParameter;
+            MyParameterChanged?.Invoke(_MyParameter, EventArgs.Empty);
+        }
+        return base.SetParametersAsync(ParameterView.Empty);
+    }
+
+    private RenderFragment Iterator => (__builder) =>
+    {
+        foreach (var item in this.myList)
+        {
+            __builder.OpenRegion(Guid.NewGuid().ToString().GetHashCode());
+            __builder.OpenElement(0, "button");
+            __builder.AddAttribute(1, "class", "btn btn-primary m-3");
+            __builder.AddAttribute(2, "onclick", Microsoft.AspNetCore.Components.EventCallback.Factory.Create<Microsoft.AspNetCore.Components.Web.MouseEventArgs>(this, () => ButtonClick(item)));
+            __builder.AddContent(3, item);
+            __builder.CloseElement();
+            __builder.CloseRegion();
+        };
+        __builder.OpenElement(2, "div");
+        __builder.AddContent(3, $"Value: {this.value}");
+        __builder.CloseElement();
+    };
+}

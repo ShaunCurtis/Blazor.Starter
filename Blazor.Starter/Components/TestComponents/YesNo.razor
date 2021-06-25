@@ -1,0 +1,31 @@
+﻿
+<div class="container">
+    <div class="p-3">
+        @((MarkupString)this.Message)
+    </div>
+    <div class="text-right p-2">
+        <button type="button" class="btn btn-danger" @onclick="(e => this.Close(true))">Exit</button>
+        <button type="button" class="btn btn-success" @onclick="(e => this.Close(false))">Cancel</button>
+    </div>
+</div>
+
+@code
+{
+    [CascadingParameter]
+    public IModalDialog Modal { get; set; }
+
+    [Parameter]
+    public string Message { get; set; } = "Are You Sure?";
+
+    protected override Task OnParametersSetAsync()
+    {
+        this.Modal.Options.TryGet<string>("Message", out string message);
+        if (!string.IsNullOrEmpty(message)) Message = message;
+        return Task.CompletedTask;
+    }
+    public void Close(bool state)
+    {
+        if (state) this.Modal.Close(ModalResult.Exit());
+        else this.Modal.Close(ModalResult.Cancel());
+    }
+}

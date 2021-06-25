@@ -1,0 +1,42 @@
+﻿@page "/Submit"
+<h3>Submit</h3>
+
+<button class="btn @BtnColor" @onclick="SubmitButton">@Label</button>
+
+<button class="btn @BtnColor" @onclick="SubmitButton2">@Label</button>
+
+<div>@Label</div>
+
+@code {
+
+    private bool Disable;
+
+    private string Label = "Submit";
+
+    private string BtnColor = "btn-dark";
+
+    private async void SubmitButton(MouseEventArgs e)
+    {
+        await Task.Delay(1000);
+        Disable = true;
+        Label = "Processing";
+        BtnColor = "btn-danger";
+        await Task.Delay(3000);
+        Disable = false;
+        Label = "Submit";
+        BtnColor = "btn-dark";
+    }
+
+    private async Task SubmitButton2(MouseEventArgs e)
+    {
+        Disable = true;
+        Label = "Processing";
+        BtnColor = "btn-danger";
+        StateHasChanged();
+        await Task.Delay(3000);
+        Disable = false;
+        Label = "Submit";
+        BtnColor = "btn-dark";
+    }
+
+}

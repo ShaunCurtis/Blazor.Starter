@@ -1,0 +1,38 @@
+﻿@page "/inputarray"
+<h3>InputArray</h3>
+
+@foreach (var modelData in _model.data)
+{
+    <div>
+        <InputNumber @bind-Value="modelData.Amount"></InputNumber>
+    </div>
+}
+
+@foreach (var modelData in _model.data)
+{
+    <div>
+        Value @modelData.Amount
+    </div>
+}
+
+
+@code {
+
+    public class ModelData
+    {
+        public int Amount { get; set; }
+    }
+
+    public class Model
+    {
+        public List<ModelData> data = new List<ModelData> {
+            new ModelData { Amount = 12},
+            new ModelData { Amount = 10},
+            new ModelData { Amount = 8},
+            new ModelData { Amount = 6},
+        };
+    }
+
+    protected Model _model = new Model();
+
+}
