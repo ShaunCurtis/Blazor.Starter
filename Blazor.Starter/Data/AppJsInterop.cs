@@ -14,5 +14,6 @@ namespace Blazor.Starter.Data
 
         public ValueTask<bool> SetBodyCss(string elementId, string cssClass)
           => JSRuntime.InvokeAsync<bool>("SetBodyCss", elementId, cssClass);
+
     }
 }

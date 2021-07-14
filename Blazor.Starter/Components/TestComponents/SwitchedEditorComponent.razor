@@ -1,0 +1,25 @@
+﻿<div>
+    <button class="btn btn-dark" disabled="@isEdit" @onclick="GoEdit">Edit</button>
+    @if (this.isEdit)
+    {
+        @EditControl
+    }
+    else
+    {
+        @ViewControl
+    }
+</div>
+
+@code {
+
+    [Parameter] public RenderFragment ViewControl { get; set; }
+
+    [Parameter] public RenderFragment EditControl { get; set; }
+
+    protected string disabled => isEdit ? "disabled": "";
+
+    protected bool isEdit { get; set; }
+
+    private void GoEdit(MouseEventArgs e)
+        => isEdit = !isEdit;
+}

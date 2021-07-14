@@ -1,96 +1,172 @@
-﻿@page "/editortest"
+﻿@page "/"
+@page "/editortest"
+
 <h3>EditorTest</h3>
-<CascadingValue Value="model">
-    <EditForm EditContext="editContext">
-        <EditFormState @ref="editFormState" EditStateChanged="EditStateChanged"></EditFormState>
+<EditForm EditContext="editContext">
+    @*<div>
+            <SwitchedEditorComponent>
+                <EditControl>
+                    Email: <InputText @bind-Value="model.Email" placeholder="Enter your Email Address"></InputText>
+                </EditControl>
+                <ViewControl>
+                    Email: <InputText @bind-Value="model.Email" disabled></InputText>
+                </ViewControl>
+            </SwitchedEditorComponent>
+        </div>*@
+    <div>
+        <FormEditControl @bind-Value="model.Email" ShowValidation="true" HelperText="Enter a valid Email Address" IsRequired="true"></FormEditControl>
         <div>
-            Email: <InputText @bind-Value="model.Email"></InputText>
+            Value = @model.Email
         </div>
-        <AddressEditor></AddressEditor>
-        <div>
-            Address: @model.Address
+    </div>
+    <div>
+        <InputText class="form-control" @bind-Value="this.model.Email"></InputText>
+        <CustomDate @bind-Value="model.Date" DisplayName="EMail"></CustomDate>
+        @*<ValidationMessage For="() => model.Date"></ValidationMessage>*@
+    </div>
+    <InputDate @bind-Value="model.MyDate"></InputDate>
+</EditForm>
+<input type="date" @bind-value="this.MyDate" />
+<div class="m-3 p-3"><input @bind-value="_errormessage"><button class="btn btn-dark ms-2" @onclick="SetError">Set Error</button></div>
+
+<form class="row g-3">
+    <div class="col-md-4">
+        <label for="validationServer01" class="form-label">First name</label>
+        <input type="text" class="form-control is-valid" id="validationServer01" value="Mark" required>
+        <div class="valid-feedback">
+            Looks good!
         </div>
-    </EditForm>
-</CascadingValue>
-
-@*@for (var counter = 0; counter < this.myList.Count; counter++)
-{
-    var item = this.myList[counter];
-    <button class="btn btn-dark m-3" @onclick="() => ButtonClick(item)">@item</button>
-}
-
-@for (var counter = 0; counter < this.myList.Count; counter++)
-{
-    var item = this.myList[counter];
-    var thiscount = counter;
-    <button class="btn btn-info m-3" @onclick="() => ButtonClick(thiscount)">@item</button>
-}
-
-@foreach (var item in this.myList)
-{
-    <button class="btn btn-primary m-3" @onclick="() => ButtonClick(item)">@item</button>
-}
-<div>Value = @this.value </div>*@
-
-@Iterator
+    </div>
+    <div class="col-md-4">
+        <label for="validationServer02" class="form-label">Last name</label>
+        <input type="text" class="form-control is-valid" id="validationServer02" value="Otto" required>
+        <div class="valid-feedback">
+            Looks good!
+        </div>
+    </div>
+    <div class="col-md-4">
+        <label for="validationServerUsername" class="form-label">Username</label>
+        <div class="input-group has-validation">
+            <span class="input-group-text" id="inputGroupPrepend3">&#64</span>
+            <input type="text" class="form-control is-invalid" id="validationServerUsername" aria-describedby="inputGroupPrepend3 validationServerUsernameFeedback" required>
+            <div id="validationServerUsernameFeedback" class="invalid-feedback">
+                Please choose a username.
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <label for="validationServer03" class="form-label">City</label>
+        <input type="text" class="form-control is-invalid" id="validationServer03" aria-describedby="validationServer03Feedback" required>
+        <div id="validationServer03Feedback" class="invalid-feedback">
+            Please provide a valid city.
+        </div>
+    </div>
+    <div class="col-md-3">
+        <label for="validationServer04" class="form-label">State</label>
+        <select class="form-select is-invalid" id="validationServer04" aria-describedby="validationServer04Feedback" required>
+            <option selected disabled value="">Choose...</option>
+            <option>...</option>
+        </select>
+        <div id="validationServer04Feedback" class="invalid-feedback">
+            Please select a valid state.
+        </div>
+    </div>
+    <div class="col-md-3">
+        <label for="validationServer05" class="form-label">Zip</label>
+        <input type="text" class="form-control is-invalid" id="validationServer05" aria-describedby="validationServer05Feedback" required>
+        <div id="validationServer05Feedback" class="invalid-feedback">
+            Please provide a valid zip.
+        </div>
+    </div>
+    <div class="col-12">
+        <div class="form-check">
+            <input class="form-check-input is-invalid" type="checkbox" value="" id="invalidCheck3" aria-describedby="invalidCheck3Feedback" required>
+            <label class="form-check-label" for="invalidCheck3">
+                Agree to terms and conditions
+            </label>
+            <div id="invalidCheck3Feedback" class="invalid-feedback">
+                You must agree before submitting.
+            </div>
+        </div>
+    </div>
+    <div class="col-12">
+        <button class="btn btn-primary" type="submit">Submit form</button>
+    </div>
+</form>
 
 @code {
 
-    private DataModel model { get; set; } = new DataModel();
+    private dataModel model { get; set; } = new dataModel();
 
-    private EditFormState editFormState;
+    private EditContext? editContext;
 
-    private EditContext editContext;
+    private ValidationMessageStore? _messageStore;
+
+    private string _errormessage { get; set; } = "Error in date";
 
     protected override Task OnInitializedAsync()
     {
         this.editContext = new EditContext(model);
+        this.editContext.OnFieldChanged += FieldChanged;
+        _messageStore = new ValidationMessageStore(this.editContext);
+
         return base.OnInitializedAsync();
     }
 
-    private void EditStateChanged(bool editState)
+    private void FieldChanged(object sender, FieldChangedEventArgs e)
     {
-        StateHasChanged();
-    }
-
-    private List<int> myList => new List<int> { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-    private int value;
-
-    private Task ButtonClick(int value)
-    {
-        this.value = value;
-        return Task.CompletedTask;
-    }
-
-    [Parameter] public int MyParameter { get; set; }
-    private int _MyParameter;
-    public event EventHandler MyParameterChanged;
-
-    public override Task SetParametersAsync(ParameterView parameters)
-    {
-        parameters.SetParameterProperties(this);
-        if (!_MyParameter.Equals(MyParameter))
+        if (this.editContext != null)
         {
-            _MyParameter = MyParameter;
-            MyParameterChanged?.Invoke(_MyParameter, EventArgs.Empty);
+            _messageStore.Clear();
         }
-        return base.SetParametersAsync(ParameterView.Empty);
+
     }
 
-    private RenderFragment Iterator => (__builder) =>
+    private void SetError(MouseEventArgs e)
     {
-        foreach (var item in this.myList)
+        if (this.editContext != null)
         {
-            __builder.OpenRegion(Guid.NewGuid().ToString().GetHashCode());
-            __builder.OpenElement(0, "button");
-            __builder.AddAttribute(1, "class", "btn btn-primary m-3");
-            __builder.AddAttribute(2, "onclick", Microsoft.AspNetCore.Components.EventCallback.Factory.Create<Microsoft.AspNetCore.Components.Web.MouseEventArgs>(this, () => ButtonClick(item)));
-            __builder.AddContent(3, item);
-            __builder.CloseElement();
-            __builder.CloseRegion();
-        };
-        __builder.OpenElement(2, "div");
-        __builder.AddContent(3, $"Value: {this.value}");
-        __builder.CloseElement();
-    };
+            var validationMessageStore = new ValidationMessageStore(this.editContext);
+            this._messageStore.Clear();
+
+            validationMessageStore.Clear();
+            var fi = new FieldIdentifier(this.model, "Date");
+            this._messageStore.Add(fi, _errormessage);
+            this._messageStore.Add(new FieldIdentifier(this.model, "Email"), _errormessage);
+        }
+    }
+
+    public class dataModel
+    {
+        public string? Email { get; set; }
+        public DateTime? Date { get; set; }
+
+        public DateTime? MyDate
+        {
+            get => _myDate;
+            set
+            {
+                if (value != null)
+                {
+                    var date = (DateTime)value;
+                    _myDate = date.AddDays(-(int)date.DayOfWeek);
+                }
+            }
+        }
+        private DateTime? _myDate;
+    }
+
+    public DateTime? MyDate
+    {
+        get => _myDate;
+        set
+        {
+            if (value != null)
+            {
+                var date = (DateTime)value;
+                _myDate = date.AddDays(-(int)date.DayOfWeek);
+            }
+        }
+    }
+    private DateTime? _myDate;
 }

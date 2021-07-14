@@ -1,94 +1,74 @@
-I think your answer over complicates this.
 
-The code below demonstrates a basic setup (it's demo code not production).
-
-It uses the `EditForm` with a model.  There are radio buttons and checkboxes linked into a model that get updated correctly.  `Selected` has a setter so you can put a breakpoint in ans see who's being updated.
+Here's your component.  I've lifted the `BuildRenderTree` code from `InputDate` and added in the `ValidationMessage` component.  You need to do it this way as I don't know a way to do the `For` binding in Razor.  I've tied the `For` directly into the `ValueExpression` property of `InputBase`.
 
 ```c#
-@page "/"
-@using Blazor.Starter.Data
+using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Forms;
+using Microsoft.AspNetCore.Components.Rendering;
+using System;
 
-<EditForm EditContext="this.editContext">
-
-    @foreach (var model in models)
+#nullable enable
+namespace Blazor.Starter.Components.TestComponents
+{
+    public class CustomDate : InputDate<DateTime?>
     {
-        <h3>@model.Value</h3>
 
-        <h5>Check boxes</h5>
-        foreach (var option in model.Options)
+        protected override void BuildRenderTree(RenderTreeBuilder builder)
         {
-            <div>
-                <InputCheckbox @bind-Value="option.Selected" />@option.Value
-            </div>
+            builder.OpenElement(0, "input");
+            builder.AddMultipleAttributes(1, AdditionalAttributes);
+            builder.AddAttribute(2, "type", "date");
+            builder.AddAttribute(3, "class", CssClass);
+            builder.AddAttribute(4, "value", BindConverter.FormatValue(CurrentValueAsString));
+            builder.AddAttribute(5, "onchange", EventCallback.Factory.CreateBinder<string?>(this, __value => CurrentValueAsString = __value, CurrentValueAsString));
+            builder.CloseElement();
+            builder.OpenComponent<ValidationMessage<DateTime?>>(6);
+            builder.AddAttribute(7, "For", this.ValueExpression);
+            builder.CloseComponent();
         }
-        <h5>Option Select</h5>
-        <div>
-            <InputRadioGroup @bind-Value="model.Selected">
-                @foreach (var option in model.Options)
-                    {
-                    <div>
-                        <InputRadio Value="option.Value" /> @option.Value
-                    </div>
-                    }
-            </InputRadioGroup>
-            <div>
-                Selected: @model.Selected
-            </div>
-        </div>
     }
-</EditForm>
-<button class="btn btn-dark" @onclick="OnClick">Check</button>
+}
+#nullable disable
+``` 
+
+And a demo page.  There's a button to manually set an error message in the `validationMessageStore`.
+
+```c#
+@page "/editortest"
+
+<h3>EditorTest</h3>
+    <EditForm EditContext="editContext">
+        <div>
+            <CustomDate @bind-Value="model.Date"></CustomDate>
+        </div>
+    </EditForm>
+<div class="m-3 p-3"><input @bind-value="_errormessage"><button class="btn btn-dark ms-2" @onclick="SetError">Set Error</button></div>
+
 
 @code {
-
+    private dataModel model { get; set; } = new dataModel();
     private EditContext editContext;
-
-    private List<Model> models;
+    private string _errormessage { get; set; } = "Error in date";
 
     protected override Task OnInitializedAsync()
     {
-        models = Models;
-        editContext = new EditContext(models);
-        return Task.CompletedTask;
+        this.editContext = new EditContext(model);
+        return base.OnInitializedAsync();
     }
 
-    public void OnClick(MouseEventArgs e)
+    private void SetError( MouseEventArgs e)
     {
-        var x = true;
+        var validationMessageStore = new ValidationMessageStore(this.editContext);
+        validationMessageStore.Clear();
+        var fi = new FieldIdentifier(this.model, "Date");
+        validationMessageStore.Add(fi, _errormessage);
     }
 
-    public List<Model> Models => new List<Model>()
+    public class dataModel
     {
-        new Model() { Value = "Fred"},
-        new Model() { Value = "Jon"},
-     };
-
-
-    public class ModelOptions
-    {
-        public string Value { get; set; }
-        public bool Selected
-        {
-            get => _Selected;
-            set
-            {
-                _Selected = value;
-            }
-        }
-        public bool _Selected;
+        public string Email { get; set; }
+        public DateTime? Date { get; set; }
     }
 
-    public class Model
-    {
-        public string Value { get; set; }
-        public string Selected { get; set; }
-        public List<ModelOptions> Options { get; set; } = new List<ModelOptions>()
-        {
-            new ModelOptions() {Value="Tea", Selected=true},
-            new ModelOptions() {Value="Coffee", Selected=false},
-            new ModelOptions() {Value="Water", Selected=false},
-
-        };
-    }
 }
 ``` 

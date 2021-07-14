@@ -1,0 +1,104 @@
+﻿@page "/JsInterop"
+<h3>JsInterop</h3>
+
+<div class="m-3 p-3">
+    <button class="btn btn-success" @onclick="GoFullAsync">Go Full Async</button>
+</div>
+<div class="m-3 p-3">
+    <button class="btn btn-success" @onclick="GoAsync">Go Async</button>
+</div>
+<div class="m-3 p-3">
+    <button class="btn btn-warning" @onclick="Go">Go</button>
+</div>
+<div class="m-3 p-3">
+    Counter: @counter
+</div>
+
+<div class="m-3 p-3">
+    <span>Fire and forget event attached to input to update Number:</span>
+</div>
+
+<div class="m-3 p-3">
+    <input type="number" @bind-value="number" placeholder="Enter a number" /> Number: @_number
+</div>
+
+@code {
+
+    [Inject] IJSRuntime JS { get; set; }
+
+    int counter;
+
+    int number
+    {
+        get => _number;
+        set
+        {
+            if (value != number)
+            {
+                _number = value;
+                NumberChanged?.Invoke(value, EventArgs.Empty);
+            }
+        }
+    }
+    int _number;
+
+    event EventHandler NumberChanged;
+
+
+    protected override Task OnInitializedAsync()
+    {
+        // !dirty no Dispose unregister
+        this.NumberChanged += this.GoEventHandlerSync;
+        return Task.CompletedTask;
+    }
+
+    private async Task GoFullAsync()
+    {
+        counter++;
+        // Await the prompt entry
+        string name = await JS.InvokeAsync<string>("prompt", "What is your name?");
+        // await close on the alert
+        await JS.InvokeVoidAsync("alert", $"Full Async Hello {name}!");
+        counter++;
+    }
+
+    private async Task GoAsync()
+    {
+        counter++;
+        // Await the prompt entry
+        string name = await JS.InvokeAsync<string>("prompt", "What is your name?");
+        // Technically shouldn't do as ValueTask should be consummed by an await, but works
+        // pops up the alert but carries on thro to the next line.
+        var task = JS.InvokeVoidAsync("alert", $"Half Async Hello {name}!");
+        counter++;
+    }
+
+    private async void Go()
+    {
+        counter++;
+        // Await the prompt entry
+        string name = await JS.InvokeAsync<string>("prompt", "What is your name?");
+        // await close on the alert
+        await JS.InvokeVoidAsync("alert", $"Fire and Forget Hello {name}!");
+        counter++;
+    }
+
+    // Fire and forget async event handler - returns a void
+    private async void GoEventHandler(object sender, EventArgs e)
+    {
+        counter++;
+        // a bit of yielding async code
+        await Task.Yield();
+        counter++;
+    }
+
+    private void GoEventHandlerSync(object sender, EventArgs e)
+    {
+        counter++;
+        var task = JS.InvokeVoidAsync("alert", $"Half Async Hello!");
+        // a bit of yielding async code
+        counter++;
+    }
+
+
+}

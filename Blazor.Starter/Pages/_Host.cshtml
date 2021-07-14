@@ -3,7 +3,12 @@
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 @{
     Layout = null;
+
 }
+<script runat="server" language="C#">
+    Dictionary<string, object>() params = new Dictionary<string, object>();
+
+</script>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -11,7 +16,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Blazor.Starter</title>
-    <base href="~/" />
+    <base href="~/" id="BlazorHRef" />
     <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
     <link href="css/site.css" rel="stylesheet" />
     <link href="Blazor.Starter.styles.css" rel="stylesheet" />
@@ -19,7 +24,7 @@
     <link rel="stylesheet" href="_content/BlazorDateRangePicker/daterangepicker.min.css" />
 </head>
 <body id="BlazorMainBody">
-    <component type="typeof(App)" render-mode="ServerPrerendered" />
+    <component type="typeof(App)" render-mode="Server" />
 
     <div id="blazor-error-ui">
         <environment include="Staging,Production">

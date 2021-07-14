@@ -1,69 +1,100 @@
-Add a JS file. 
+
+Add a JS file to the client app. 
 
 *site.js*
 ```
 
-window.SetBodyCss = function (elementId, classname) {
+window.SetBaseHref = function (elementId, hRef) {
     var link = document.getElementById(elementId);
     if (link !== undefined) {
-        link.className = classname;
+        link.href = hRef;
     }
     return true;
 }
 ```
 
-Reference it in _Host.cshtml_.  
-Create an `id` on `<body>`.
+*wwwroot/appsettings.json*
+```
+{
+  "Configuration": {
+    "BaseHRef": "/blue"
+  }
+}
+```
+
+Reference it in _index.html_ and create an `id` on `<base>`.
 
 ```
-<body id="BlazorMainBody">
+    <base href="~/" id="BlazorHRef" />
+
+.......
 
     <script src="/site.js"></script>
-    <script src="_framework/blazor.server.js"></script>
-</body>
-```
-
-Add a helper class 
-```
-using Microsoft.JSInterop;
-using System.Threading.Tasks;
-
-namespace Blazor.Starter
-{
-    public class AppJsInterop
-    {
-        protected IJSRuntime JSRuntime { get; }
-
-        public AppJsInterop(IJSRuntime jsRuntime)
-        {
-            JSRuntime = jsRuntime;
-        }
-
-        public ValueTask<bool> SetBodyCss(string elementId, string cssClass)
-          => JSRuntime.InvokeAsync<bool>("SetBodyCss", elementId, cssClass);
-    }
-}
-```
-
-This shows toggling it in a page
 
 ```
-<button type="button" @onclick="SetCss">SetCss</button>
 
+##### Demo in the index page
+
+```
+@page "/"
+@page "/red/"
+
+<h1>Hello, world!</h1>
+
+    Welcome to your new app.
+
+<button type="button" @onclick="this.SetBaseHRef">SetHRef</button>
+
+<SurveyPrompt Title="How is Blazor working for you?" />
 @code {
+
     [Inject] private IJSRuntime _js { get; set; }
 
-    private bool _isbodyCss;
+    private bool _isAltHRef;
 
-    private string _bodyCss => _isbodyCss ? "Theme-Dark" : "Theme-Light";
+    private string _altHRef => _isAltHRef ? "/" : "/red";
 
-    private async Task SetCss()
+    public async Task SetBaseHRef()
     {
-        var appJsInterop = new AppJsInterop(_js);
-        await appJsInterop.SetBodyCss("BlazorMainBody", _bodyCss);
-        _isbodyCss = !_isbodyCss;
+        await this.SetBaseHref("BlazorHRef", _altHRef);
+        _isAltHRef = !_isAltHRef;
     }
+
+    public ValueTask<bool> SetBaseHref(string elementId, string hRef)
+      => _js.InvokeAsync<bool>("SetBaseHref", elementId, hRef);
+
 }
 ```
 
-You can change out the whole stylesheet in a similar way - see this [note of mine](https://shauncurtis.github.io/posts/DynamicCss.html)
+##### Setting it at startup in *App.razor*
+
+```
+<Router AppAssembly="@typeof(Program).Assembly" PreferExactMatches="@true">
+    <Found Context="routeData">
+        <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+    </Found>
+    <NotFound>
+        <LayoutView Layout="@typeof(MainLayout)">
+            <p>Sorry, there's nothing at this address.</p>
+        </LayoutView>
+    </NotFound>
+</Router>
+
+@code {
+    [Inject] IConfiguration Configuration { get; set; }
+
+    [Inject] private IJSRuntime _js { get; set; }
+
+    protected async override Task OnAfterRenderAsync(bool firstRender)
+    {
+        var baseHRef = Configuration.GetValue<string>("Configuration:BaseHRef");
+        if (!string.IsNullOrEmpty(baseHRef)) await this.SetBaseHref("BlazorHRef", baseHRef);
+    }
+
+    public ValueTask<bool> SetBaseHref(string elementId, string hRef)
+          => _js.InvokeAsync<bool>("SetBaseHref", elementId, hRef);
+
+}
+```
+
+You can change out most things in the header in a similar way.

@@ -1,0 +1,58 @@
+﻿@page "/Asyncevent"
+<h3>asyncevent</h3>
+<div>
+    <button class="btn btn-dark" @onclick="Update">Update Void</button>
+</div>
+<div>
+    <button class="btn btn-dark" @onclick="UpdateAsync">Update Async</button>
+</div>
+<div>
+    <button class="btn btn-dark" @onclick="dddd">Update DDD</button>
+</div>
+<div>
+    <button class="btn btn-dark" @onclick="eeee">Update EEE</button>
+</div>
+<div>
+    @value
+</div>
+
+@code {
+
+    private int value;
+
+    private async void Update()
+    {
+        value++;
+        await Task.Delay(3000);
+        value++;
+    }
+
+    private async Task UpdateAsync()
+    {
+        value++;
+        await Task.Delay(3000);
+        value++;
+    }
+
+    private async void dddd()
+    {
+        var task = UpdateAsync();
+        StateHasChanged();
+        if (!task.IsCompleted)
+        {
+            await task;
+            StateHasChanged();
+        }
+    }
+
+    private async void eeee()
+    {
+        var task = InvokeAsync(Update);
+        StateHasChanged();
+        if (task.Status != TaskStatus.RanToCompletion && task.Status != TaskStatus.Canceled)
+        {
+            await task;
+            StateHasChanged();
+        }
+    }
+}

@@ -17,7 +17,7 @@
 
     public async Task ChangeLayout(Type layout)
     {
-        Layout = layout?? Layout;
+        Layout = layout ?? Layout;
         await InvokeAsync(this.StateHasChanged);
     }
 

@@ -1,0 +1,54 @@
+﻿@page "/Reports"
+<h3>Reports</h3>
+
+<div>
+    <table class="table table-sm small">
+        <tr>
+            @foreach (var property in properties.GetProperties().ToList())
+            {
+                <th>@property.Name</th>
+            }
+        </tr>
+        @foreach (var report in ReportsList)
+        {
+            <tr>
+                @foreach (var property in properties.GetProperties().ToList())
+                {
+                    <td>
+                        <div class="border-0">
+                                @property.GetValue(report)
+                        </div>
+                    </td>
+                }
+            </tr>
+        }
+    </table>
+</div>
+
+
+
+
+@code {
+    public List<ReportsListModel> ReportsList { get; set; }
+    private Type properties { get; set; }
+
+    protected override Task OnInitializedAsync()
+    {
+        ReportsList = new List<ReportsListModel>
+        {
+            new ReportsListModel { Name= "Report1", Value="My Report" },
+            new ReportsListModel { Name= "Report2", Value="Fred's Report" }
+        };
+        properties = typeof(ReportsListModel);
+        return Task.CompletedTask;
+    }
+
+    public class ReportsListModel
+    {
+        public Guid GUID { get; } = Guid.NewGuid();
+        public string Name { get; set; }
+        public string Value { get; set; }
+
+    }
+
+}

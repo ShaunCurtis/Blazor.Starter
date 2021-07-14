@@ -1,0 +1,26 @@
+<Router AppAssembly="@typeof(Program).Assembly" PreferExactMatches="@true">
+    <Found Context="routeData">
+        <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+    </Found>
+    <NotFound>
+        <LayoutView Layout="@typeof(MainLayout)">
+            <p>Sorry, there's nothing at this address.</p>
+        </LayoutView>
+    </NotFound>
+</Router>
+
+@code {
+    [Inject] IConfiguration Configuration { get; set; }
+
+    [Inject] private IJSRuntime _js { get; set; }
+
+    protected async override Task OnAfterRenderAsync(bool firstRender)
+    {
+        var baseHRef = Configuration.GetValue<string>("Configuration:BaseHRef");
+        if (!string.IsNullOrEmpty(baseHRef)) await this.SetBaseHref("BlazorHRef", baseHRef);
+    }
+
+    public ValueTask<bool> SetBaseHref(string elementId, string hRef)
+          => _js.InvokeAsync<bool>("SetBaseHref", elementId, hRef);
+
+}

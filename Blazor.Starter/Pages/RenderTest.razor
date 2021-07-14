@@ -1,0 +1,14 @@
+﻿@page "/TestRender"
+<h3>test5</h3>
+<RendererComponent Components="this.Components"></RendererComponent>
+
+@code {
+
+    private List<RenderComponent> Components { get; set; } = new List<RenderComponent>
+    {
+      new RenderComponent {ComponentType = typeof(SurveyPrompt) },
+      new RenderComponent {ComponentType = typeof(TestRenderComponent), Parameters = (new Dictionary<string, object> { ["Message"] = "Hello Universe" }) }
+    };
+
+
+}
