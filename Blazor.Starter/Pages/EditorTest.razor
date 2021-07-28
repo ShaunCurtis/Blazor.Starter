@@ -1,7 +1,15 @@
 ﻿@page "/"
 @page "/editortest"
 
+@implements IDisposable
+@implements IAsyncDisposable
+
 <h3>EditorTest</h3>
+
+<InheritedDivComponent></InheritedDivComponent>
+
+<MyComponent></MyComponent>
+
 <EditForm EditContext="editContext">
     @*<div>
             <SwitchedEditorComponent>
@@ -20,7 +28,7 @@
         </div>
     </div>
     <div>
-        <InputText class="form-control" @bind-Value="this.model.Email"></InputText>
+        <InputText @ref="myInputText" class="form-control" @bind-Value="this.model.Email"></InputText>
         <CustomDate @bind-Value="model.Date" DisplayName="EMail"></CustomDate>
         @*<ValidationMessage For="() => model.Date"></ValidationMessage>*@
     </div>
@@ -73,14 +81,14 @@
     </div>
     <div class="col-md-3">
         <label for="validationServer05" class="form-label">Zip</label>
-        <input type="text" class="form-control is-invalid" id="validationServer05" aria-describedby="validationServer05Feedback" required>
+        <input type="text" tabindex="0" @ref="myFocusInput" class="form-control is-invalid" id="validationServer05" aria-describedby="validationServer05Feedback" required>
         <div id="validationServer05Feedback" class="invalid-feedback">
             Please provide a valid zip.
         </div>
     </div>
     <div class="col-12">
         <div class="form-check">
-            <input class="form-check-input is-invalid" type="checkbox" value="" id="invalidCheck3" aria-describedby="invalidCheck3Feedback" required>
+            <input class="form-check-input is-invalid" @ref="myFocusInput" type="checkbox" value="" id="invalidCheck3" aria-describedby="invalidCheck3Feedback" required>
             <label class="form-check-label" for="invalidCheck3">
                 Agree to terms and conditions
             </label>
@@ -94,7 +102,26 @@
     </div>
 </form>
 
+<div cklass="m-2 p-2">
+    <button class="btn @buttonCss" @onclick="ToggleDirty">@buttonText</button>
+</div>
+
+<div cklass="m-2 p-2">
+    <button class="btn btn-dark" @onclick="Focus">@buttonText</button>
+</div>
+<div>
+    <a href="/Fred/1/Open">Got to Fred</a>
+</div>
+
 @code {
+
+    public ElementReference myFocusInput;
+
+    [Inject] private IStoredDataService? StoredDataService { get; set; }
+
+    [Inject] private IJSRuntime _js { get; set; }
+
+    public readonly Guid UniqueId = new Guid("d7946ef9-1821-4f8b-b029-9b1526031f53");
 
     private dataModel model { get; set; } = new dataModel();
 
@@ -104,14 +131,36 @@
 
     private string _errormessage { get; set; } = "Error in date";
 
-    protected override Task OnInitializedAsync()
+    private bool _setAsBackPage;
+
+    private InputText myInputText;
+
+    protected async override Task OnInitializedAsync()
     {
+        if (StoredDataService != null)
+        {
+            var data = await StoredDataService.GetStoredData(UniqueId);
+            if (data != null)
+            {
+                var obj = System.Text.Json.JsonSerializer.Deserialize<dataModel>(data.Data);
+                this.model = (dataModel)obj;
+                _setAsBackPage = true;
+            }
+        }
         this.editContext = new EditContext(model);
         this.editContext.OnFieldChanged += FieldChanged;
         _messageStore = new ValidationMessageStore(this.editContext);
 
-        return base.OnInitializedAsync();
+        //return base.OnInitializedAsync();
     }
+
+    protected async override Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_setAsBackPage)
+            await SetBackPage("/");
+        _setAsBackPage = false;
+    }
+
 
     private void FieldChanged(object sender, FieldChangedEventArgs e)
     {
@@ -121,6 +170,24 @@
         }
 
     }
+
+    private void Focus()
+      => _js.InvokeAsync<bool>("SetElementFocus", myFocusInput);
+
+    private bool isDirty = false;
+    private string buttonText => isDirty ? "Set Clean" : "Set Dirty";
+    private string buttonCss => isDirty ? "btn-danger" : "btn-success";
+
+    protected async void ToggleDirty()
+    {
+        isDirty = !isDirty;
+        if (isDirty)
+            await SetBackPage("/");
+    }
+
+    public ValueTask<bool> SetBackPage(string url)
+      => _js.InvokeAsync<bool>("SetBackPage", url);
+
 
     private void SetError(MouseEventArgs e)
     {
@@ -169,4 +236,23 @@
         }
     }
     private DateTime? _myDate;
+
+    public void Dispose()
+    {
+        var x = true;
+    }
+
+    public ValueTask DisposeAsync()
+    {
+        if (isDirty)
+        {
+            var mod = new dataModel { Email = "me@me.com", Date = DateTime.Now };
+            //var json = System.Text.Json.JsonSerializer.Serialize(this.model);
+            var json = System.Text.Json.JsonSerializer.Serialize(mod);
+            var data = new StoredData() { Data = json, UniqueId = this.UniqueId };
+            StoredDataService.SetStoredData(data);
+        }
+        return ValueTask.CompletedTask;
+    }
+
 }

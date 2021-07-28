@@ -1,0 +1,19 @@
+﻿@page "/Test5"
+<div class="">
+    <input type="text" placeholder="Search..." @bind="@searchValue">
+    <button @onclick="Search">Search</button>
+</div>
+
+@count
+
+@code {
+
+    string searchValue;
+    int count;
+
+    void Search()
+    {
+        var x = searchValue;
+        count++;
+    }
+}

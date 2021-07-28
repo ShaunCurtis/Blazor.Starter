@@ -1,0 +1,29 @@
+﻿@namespace Blazor.Starter.Components
+@inherits InputBase<string>
+
+<InputText class="form-control"
+           @bind-Value="this.CurrentValue"
+           @attributes="AdditionalAttributes" />
+
+@*<InputText class="form-control"
+           Value="@this.Value"
+           ValueChanged="this.ValueChanged"
+           ValueExpression="this.ValueExpression"
+           @attributes="AdditionalAttributes" />*@
+
+
+
+@code {
+    protected override bool TryParseValueFromString(string value, [System.Diagnostics.CodeAnalysis.MaybeNullWhen(false)] out string result, [System.Diagnostics.CodeAnalysis.NotNullWhen(false)] out string validationErrorMessage)
+    {
+        result = value;
+        validationErrorMessage = null;
+
+        return true;
+    }
+
+    protected override bool ShouldRender()
+    {
+        return base.ShouldRender();
+    }
+}

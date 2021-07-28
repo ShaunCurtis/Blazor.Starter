@@ -10,8 +10,12 @@
 
 <button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
 
+<button class="btn btn-dark" @onclick="Navigate">Click me</button>
+
 @code {
     [Parameter] public string ID { get; set; }
+
+    [Inject] NavigationManager NavManager { get; set; }
 
     private int currentCount = 0;
 
@@ -19,4 +23,10 @@
     {
         currentCount++;
     }
+
+    private void Navigate()
+    {
+        NavManager.NavigateTo("/fetchdata");
+    }
 }
+

@@ -1,0 +1,24 @@
+﻿@page "/Test4"
+<input type="text" placeholder="Enter a Value" @bind-value="InputValue" @oninput="this.Filter" />
+<label for="modal_table_autosearch">Search by name</label>
+
+<button type="button" @onclick="() => this.Filter(new ChangeEventArgs { Value= null })">
+    Clear Value
+</button>
+@code {
+
+    private string? InputValue { get; set; }
+
+    protected async Task Filter(ChangeEventArgs args)
+    {
+        if (args.Value is null)
+        {
+            InputValue = null;
+            // this.SetFilteringCollections();
+            return;
+        }
+        var searchValue = args.Value?.ToString();
+        // simulate some async work
+        await Task.Delay(1000);
+    }
+}

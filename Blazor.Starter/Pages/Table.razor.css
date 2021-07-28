@@ -1,0 +1,11 @@
+﻿::deep td {
+    background-color: aqua;
+}
+
+::deep td.mycolumn {
+    background-color: cyan;
+}
+
+::deep .mycolumn-dark {
+    background-color: darkcyan;
+}

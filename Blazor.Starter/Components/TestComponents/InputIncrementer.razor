@@ -1,0 +1,21 @@
+﻿@inherits InputBase<int>
+
+<div style="border: solid; padding: 1em">
+    CustomInput <br />
+    Value: @Value
+    <button type="button" @ref="Element">Increment using JS Interop</button>
+    <button type="button" @onclick="Increment">Increment using C# Event handler</button>
+</div>
+
+<script suppress-error="BL9992">
+
+    function init(dotNetRef, elementRef) {
+        elementRef.addEventListener('click', () => {
+            setTimeout(() => dotNetRef.invokeMethodAsync('IncrementJsInterop'), 50);
+        });
+    }
+</script>
+
+@code {
+
+}

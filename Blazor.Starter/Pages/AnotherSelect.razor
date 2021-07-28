@@ -1,0 +1,57 @@
+﻿@page "/select2"
+<div>
+    <p>Name Chooser</p>
+    <select @bind="name">
+        @foreach (var name in Names)
+        {
+            <option>@name</option>
+        }
+    </select>
+</div>
+
+
+<select @bind="@chosenName">
+    @foreach (var name in Names)
+    {
+        <option>@name</option>
+    }
+</select>
+
+
+
+@code{
+
+    string name
+    {
+        get => _name;
+        set
+        {
+            if (!value.Equals(_name))
+            {
+                _name = value;
+                // do something or trigger an event;
+                _chosenname = value;
+            }
+        }
+    }
+
+    string chosenName
+    {
+        get => _chosenname;
+        set
+        {
+            if (!value.Equals(_chosenname))
+            {
+                _chosenname = value;
+                // do something or trigger an event;
+            }
+        }
+    }
+
+    string _name = null;
+
+    string _chosenname = "Peter";
+
+    List<string> Names = new List<string>() { "Paul", "Peter", "Jane", "Jackie" };
+
+}

@@ -56,3 +56,9 @@ a, .btn-link {
 .Body-Transparent {
     background-color: transparent;
 }
+
+
+div[b-0123456789] {
+    background-color: blue;
+}
+

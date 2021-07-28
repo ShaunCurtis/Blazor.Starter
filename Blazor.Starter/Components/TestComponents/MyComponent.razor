@@ -1,0 +1,19 @@
+﻿@inherits BaseComponent
+
+<div class="my-content">
+    <p>From derived class</p>
+    @SayHelloWorld()
+
+    @Div
+</div>
+
+@code{
+
+    private RenderFragment Div => (builder) =>
+        {
+            builder.OpenElement(0, "div");
+            builder.AddAttribute(1, "b-0123456789");
+            builder.AddContent(2, "My Div");
+            builder.CloseComponent();
+        };
+}

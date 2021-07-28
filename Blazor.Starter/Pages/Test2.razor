@@ -1,0 +1,57 @@
+﻿@page "/Test2"
+<EditForm EditContext="@_editContext" OnValidSubmit="@HandleValidSubmit" OnInvalidSubmit="HandleInValidSubmit">
+    <DataAnnotationsValidator />
+    <div class=" m-2 p-2">
+        <button type="submit" class="btn btn-primary">New Person</button>
+    </div>
+
+    <ValidationSummary />
+
+    <label class="form-label">First Name (Only Updates on Exit)</label>
+    <InputText class="form-control" @bind-Value="this._formModel.FirstName"></InputText>
+    <label class="form-label">First Name (Updates on Typing)</label>
+    <InputTextOnInput class="form-control" @bind-Value="this._formModel.FirstName"></InputTextOnInput>
+    <CustomInput class="form-control" @bind-Value="this._formModel.FirstName"></CustomInput>
+    <div class=" m-2 p-2">
+        <button type="submit" class="btn btn-primary">New Person</button>
+    </div>
+
+
+</EditForm>
+<div class="m-3 p-3">@_submitType</div>
+
+@code {
+
+    private EditContext? _editContext;
+
+    private FormModel _formModel;
+
+    private string _submitType;
+
+    private void HandleValidSubmit()
+    {
+        _submitType = "VALID SUBMIT!";
+        System.Diagnostics.Debug.WriteLine("VALID SUBMIT!");
+    }
+
+    private void HandleInValidSubmit()
+    {
+        _submitType = "INVALID SUBMIT!";
+        System.Diagnostics.Debug.WriteLine("INVALID SUBMIT!");
+    }
+
+    private class FormModel
+    {
+        [Required(AllowEmptyStrings = false, ErrorMessage = "Provide a first name")]
+        public string FirstName { get; set; }
+
+    }
+
+    protected override Task OnInitializedAsync()
+    {
+        _formModel = new FormModel();
+        _editContext = new EditContext(_formModel);
+        return base.OnInitializedAsync();
+    }
+
+}

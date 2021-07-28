@@ -1,0 +1,61 @@
+﻿@using System.Linq.Expressions
+
+<div style="border: solid; padding: 1em">
+    CustomInput <br />
+    Value: @Value
+    <button type="button" @ref="btnElementRef">Increment using JS Interop</button>
+    <button type="button" @onclick="Increment">Increment using C# Event handler</button>
+</div>
+
+<script suppress-error="BL9992">
+
+    function init(dotNetRef, elementRef) {
+        elementRef.addEventListener('click', () => {
+            setTimeout(() => dotNetRef.invokeMethodAsync('IncrementJsInterop'), 50);
+        });
+    }
+</script>
+
+@code {
+    ElementReference btnElementRef;
+    DotNetObjectReference<TestJSCaller> dotNetRef;
+
+    [Inject] IJSRuntime JS { get; set; }
+
+    [CascadingParameter] EditContext EditContext { get; set; }
+
+    [Parameter] public int Value { get; set; }
+    [Parameter] public EventCallback<int> ValueChanged { get; set; }
+    [Parameter] public Expression<Func<int>> ValueExpression { get; set; }
+    [Parameter] public EventCallback ValueUpdated { get; set; }
+
+    public async Task Increment()
+    {
+        Console.WriteLine($"=================Increment - Called >> {EditContext.IsModified()}");
+        Console.WriteLine($"=> Increment - Value++ >> {EditContext.IsModified()}");
+        Value++;
+        Console.WriteLine($"=> Increment - ValueChanged.InvokeAsync >> {EditContext.IsModified()}");
+        await ValueChanged.InvokeAsync(Value);
+        Console.WriteLine($"=> Increment - EditContext.NotifyFieldChanged >> {EditContext.IsModified()}");
+        EditContext.NotifyFieldChanged(FieldIdentifier.Create(ValueExpression));
+        Console.WriteLine($"=================Increment - Completed >> {EditContext.IsModified()}");
+    }
+
+    [JSInvokable]
+    public async Task IncrementJsInterop() {
+        Console.WriteLine($"=================IncrementJsInterop - Called >> {EditContext.IsModified()}");
+        await Increment();
+        Console.WriteLine($"=================IncrementJsInterop - Completed >> {EditContext.IsModified()}");
+    }
+
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        if (firstRender)
+        {
+            dotNetRef = DotNetObjectReference.Create(this);
+            await JS!.InvokeVoidAsync("init", dotNetRef, btnElementRef);
+        }
+    }
+}

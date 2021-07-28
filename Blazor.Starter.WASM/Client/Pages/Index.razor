@@ -1,49 +1,13 @@
 ﻿@page "/"
-@page "/red/"
-@page "/blue/"
+@page "/dashboard/"
 
 <h1>Hello, world!</h1>
 
     Welcome to your new app.
 
-<button type="button" @onclick="this.SetBaseHRef">SetHRef</button>
-
-<div>Href: @baseHRef</div>
-
 <SurveyPrompt Title="How is Blazor working for you?" />
+
+
 @code {
-
-    [Inject] private IJSRuntime _js { get; set; }
-
-
-    [Inject] IConfiguration Configuration { get; set; }
-
-    private bool _isAltHRef;
-
-    private string _altHRef => _isAltHRef ? "/" : "/red";
-
-    string baseHRef;
-
-    protected async override Task OnInitializedAsync()
-    {
-        await base.OnInitializedAsync();
-    }
-
-    //protected async override Task OnAfterRenderAsync(bool firstRender)
-    //{
-    //    var x = Configuration["BaseHRef"];
-    //    baseHRef = Configuration.GetValue<string>("Configuration:BaseHRef");
-    //     if (!string.IsNullOrEmpty(baseHRef)) await this.SetBaseHref("BlazorHRef", baseHRef);
-    //}
-
-
-    public async Task SetBaseHRef()
-    {
-        await this.SetBaseHref("BlazorHRef", _altHRef);
-        _isAltHRef = !_isAltHRef;
-    }
-
-    public ValueTask<bool> SetBaseHref(string elementId, string hRef)
-      => _js.InvokeAsync<bool>("SetBaseHref", elementId, hRef);
 
 }

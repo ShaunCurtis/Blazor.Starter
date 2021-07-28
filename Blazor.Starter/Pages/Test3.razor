@@ -1,0 +1,72 @@
+﻿@page "/Test3"
+<EditForm EditContext="@_editContext" OnValidSubmit="@HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <label class="form-label">First Name</label>
+    <CustomInput class="form-control" @bind-Value="this._formModel.Name" Id="mycontrol"></CustomInput>
+    <label class="form-label">First Name</label>
+    <CustomInput class="form-control" @bind-Value="this._formModel.Name" Id="mydisabledcontrol" Disabled="true"></CustomInput>
+
+    <SillyComponent class="form-control" @bind-Value="this._formModel.Name"></SillyComponent>
+    <InputText class="" @bind-Value="this._formModel.MyName"></InputText>
+    <InputNumber @bind-Value="_formModel.MyValue" />
+
+    <InputNumber  Value="this._formModel.MyValue" ValueChanged="@bindevent" ValueExpression="@bindexpression" />
+
+
+    <div class=" m-2 p-2">
+        <button type="submit" class="btn btn-primary">New Person</button>
+    </div>
+
+    <div class="p3-m-3">Value: @_formModel.MyName</div>
+
+    <div class="p3-m-3">MyValue: @_formModel.MyValue</div>
+
+</EditForm>
+
+@code {
+
+    private EditContext? _editContext;
+
+    private FormModel _formModel;
+
+
+    private void HandleValidSubmit()
+    {
+        var x = Microsoft.AspNetCore.Components.CompilerServices.RuntimeHelpers.TypeCheck<Microsoft.AspNetCore.Components.EventCallback<double?>>(Microsoft.AspNetCore.Components.EventCallback.Factory.Create<double?>(this, AmountUpdated));
+        // hanlder
+    }
+
+    EventCallback<double?> bindevent => Microsoft.AspNetCore.Components.CompilerServices.RuntimeHelpers.TypeCheck<Microsoft.AspNetCore.Components.EventCallback<double?>>(Microsoft.AspNetCore.Components.EventCallback.Factory.Create<double?>(this, AmountUpdated));
+    System.Linq.Expressions.Expression<Func<double?>> bindexpression => Microsoft.AspNetCore.Components.CompilerServices.RuntimeHelpers.TypeCheck<System.Linq.Expressions.Expression<System.Func<System.Double?>>>(() => this._formModel.MyValue);
+
+    private void HandleInValidSubmit()
+    {
+        // hanlder
+    }
+
+
+
+    private class FormModel
+    {
+        //[Required(AllowEmptyStrings = false, ErrorMessage = "Provide a first name")]
+        [StringLength(5)][Required] public string Name { get; set; }
+
+        [StringLength(5)] [Required] public string MyName { get; set; }
+
+        public double MyValue { get; set; }
+    }
+
+    void AmountUpdated(double? value)
+    {
+
+    }
+
+    protected override Task OnInitializedAsync()
+    {
+        _formModel = new FormModel();
+        _editContext = new EditContext(_formModel);
+        return base.OnInitializedAsync();
+    }
+
+}

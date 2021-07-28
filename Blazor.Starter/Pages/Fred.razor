@@ -1,0 +1,56 @@
+﻿@page "/Names"
+<h3>List 1</h3>
+<div>
+    @foreach (var name in Names)
+    {
+        <div>@name</div>
+    }
+</div>
+
+<h3>List 2</h3>
+@Method1
+
+<h3>List 3</h3>
+@Method2
+
+
+
+@code {
+
+    private List<string> Names => new List<string> {
+            "Fred",
+            "Yu",
+            "Ahmed"
+        };
+
+    private RenderFragment Method1 => (builder) =>
+    {
+        builder.AddMarkupContent(0, "<h3>Fred</h3>");
+        builder.OpenElement(1, "div");
+        foreach (var name in Names)
+        {
+            builder.OpenElement(2, "div");
+            builder.AddContent(3, name);
+            builder.CloseElement();
+        }
+        builder.CloseElement();
+    };
+
+    private RenderFragment Method2 => (builder) =>
+    {
+        builder.AddMarkupContent(0, "<h3>Fred</h3>");
+        builder.AddContent(1, Loop);
+    };
+
+    private RenderFragment Loop => (builder) =>
+    {
+        foreach (var name in Names)
+        {
+            builder.OpenRegion(0);
+            builder.OpenElement(1, "div");
+            builder.AddContent(2, name);
+            builder.CloseElement();
+            builder.CloseRegion();
+        }
+    };
+}

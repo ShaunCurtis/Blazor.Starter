@@ -1,0 +1,11 @@
+﻿<tr @attributes="UserAttributes">
+    @ChildContent
+</tr>
+
+@code {
+
+    [Parameter(CaptureUnmatchedValues = true)] public IDictionary<string, object> UserAttributes { get; set; } = new Dictionary<string, object>();
+
+    [Parameter] public RenderFragment ChildContent { get; set; }
+
+}

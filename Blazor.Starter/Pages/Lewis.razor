@@ -1,0 +1,21 @@
+﻿@page "/Lewis"
+
+<h1>Hello, world!</h1>
+
+Welcome to your new app.
+
+<EditForm Model="Model">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <PrimaryInput class="" @bind-Value="Model.Name" />
+
+
+    <InputText class="" @bind-Value="Model.Name" />
+
+</EditForm>
+
+@code {
+
+    MyModel Model { get; set; } = new MyModel();
+} 

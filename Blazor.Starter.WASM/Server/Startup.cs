@@ -46,6 +46,18 @@ namespace Blazor.Starter.WASM.Server
             app.UseBlazorFrameworkFiles();
             app.UseStaticFiles();
 
+            app.MapWhen(ctx => ctx.Request.Path.StartsWithSegments("/dashboard"), app1 =>
+            {
+                app1.UseRouting();
+                app1.UseEndpoints(endpoints =>
+                {
+                    endpoints.MapRazorPages();
+                    endpoints.MapControllers();
+                    endpoints.MapFallbackToFile("dashboard.html");
+                });
+
+            });
+
             app.UseRouting();
 
             app.UseEndpoints(endpoints =>

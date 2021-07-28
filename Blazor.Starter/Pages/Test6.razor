@@ -1,31 +1,4 @@
-If I read your question correctly, you want to set the focus to an `id` from a html element.
-
-Add a `site.js` to *wwwroot* with the following code:
-
-```
-window.SetElementFocus = function (element) {
-    element.focus();
-    return element === true;
-}
-
-window.SetFocusByElementId = function (elementId) {
-    var element = document.getElementById(elementId);
-    element.focus();
-    return element === true;
-}
-```
-
-Reference the js file in your startup file (this is for server)
-
-```
-    <script src="/site.js"></script>
-    <script src="_framework/blazor.server.js"></script>
-```
-
-And then here's a demo page using both `Element` and `id` to set the focus
-
-```
-@page "/Test6"
+﻿@page "/Test6"
 <div class="m-2">
     <input type="text" @ref="Input1" placeholder="Input 1" id="input1" />
 </div>
@@ -48,6 +21,10 @@ And then here's a demo page using both `Element` and `id` to set the focus
     <button class="btn btn-secondary me-1" @onclick="() => FocusById(1)">Id Focus 1</button>
     <button class="btn btn-secondary me-1" @onclick="() => FocusById(2)">Id Focus 2</button>
     <button class="btn btn-secondary me-1" @onclick="() => FocusById(3)">Id Focus 3</button>
+</div>
+
+<div class="m-2 p-2">
+    <button class="btn btn-secondary me-1" @onclick="() => GetElementRef()">ElementRef</button>
 </div>
 
 
@@ -80,5 +57,9 @@ And then here's a demo page using both `Element` and `id` to set the focus
         };
         await _js.InvokeAsync<bool>("SetFocusByElementId", input);
     }
+
+    private async Task GetElementRef()
+    {
+        var x = await _js.InvokeAsync<System.Text.Json.JsonDocument>("GetElementRef", "input1");
+    }
 }
-```

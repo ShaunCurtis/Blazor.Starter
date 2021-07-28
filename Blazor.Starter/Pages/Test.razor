@@ -1,41 +1,44 @@
-﻿@page "/modal"
+﻿@page "/Test"
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md" style="background-color:lightblue">
+            this is always visible
+        </div>
+        @if (displaySecond)
+        {
+            <div class="col-md" style="background-color:lightcoral">
+                optional optic
+            </div>
+        }
 
-<div class="m-2 p-2">
-    <button class="btn btn-primary" @onclick="GetYesNo">Open</button>
+    </div>
+    <div class="row">
+        <div class="col-md @col1" style="background-color:lightblue">
+            this is always visible
+        </div>
+        @if (displaySecond)
+        {
+            <div class="col-md @col2" style="background-color:lightcoral">
+                optional optic
+            </div>
+        }
+
+    </div>
+    <div class="row">
+        <button @onclick="Display2">Display</button>
+    </div>
 </div>
 
-<div class="m-2 p-2">
-    <button class="btn btn-info" @onclick="GetEditor">Open Editor</button>
-</div>
 
-<div class="m-2 p-2">
-    <button class="btn btn-dark" @onclick="GetCounter">Get FetchData</button>
-</div>
+@code{
+    private bool displaySecond = false;
 
-<BaseModalDialog @ref="this.Modal"></BaseModalDialog>
-@code
-{
-    private BaseModalDialog Modal { get; set; }
-
-    private void GetEditor(MouseEventArgs e)
+    private void Display2(MouseEventArgs e)
     {
-        var options = new ModalOptions();
-        options.Set(ModalOptions.__ExitOnBackGroundClick, true);
-        Modal.ShowAsync<PseudoEditor>(options);
+        displaySecond = !displaySecond;
     }
 
-    private void GetYesNo(MouseEventArgs e)
-    {
-        var options = new ModalOptions();
-        options.Set("Message", "<h2>Hello There</h2>");
-        Modal.ShowAsync<YesNo>(options);
-    }
+    private string col1 => displaySecond ? "col-md-4" : "";
 
-    private void GetCounter(MouseEventArgs e)
-    {
-        var options = new ModalOptions();
-        options.Set(ModalOptions.__ExitOnBackGroundClick, true);
-        Modal.ShowAsync<FetchData>(options);
-    }
-
+    private string col2 => displaySecond ? "col-md-8" : "";
 }
