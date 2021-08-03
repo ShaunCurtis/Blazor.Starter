@@ -1,0 +1,21 @@
+﻿@page "/Test7"
+@foreach (var item in model)
+{
+    <div><input type="checkbox" class="checkbox" checked="@item.IsReady" @onchange="((e)=>ItemIsReady(e, item))" /> <span>@item.IsReady</span></div>
+}
+
+@code  {
+
+        List<ModelClass> model { get; set; } = new List<ModelClass> { new ModelClass(), new ModelClass() { IsReady=true }, new ModelClass() };
+
+    class ModelClass
+    {
+        public bool IsReady { get; set; }
+    }
+
+    void ItemIsReady(ChangeEventArgs e, ModelClass item)
+    {
+        item.IsReady = (bool)e.Value;
+        StateHasChanged();
+    }
+}

@@ -1,0 +1,17 @@
+﻿@if (this.Show)
+{
+    if (this.ChildContent != null)
+    {
+        @this.ChildContent
+    }
+    else
+    {
+        @((MarkupString)this.Body)
+    }
+}
+
+@code {
+    [Parameter] public bool Show { get; set; }
+    [Parameter] public RenderFragment ChildContent { get; set; }
+    [Parameter] public string Body { get; set; }
+}

@@ -1,84 +1,45 @@
-If I read your question correctly, you want to set the focus to an `id` from a html element.
+Here's an alternative answer using a more generic methodology of doing what you want.
 
-Add a `site.js` to *wwwroot* with the following code:
+Create a simple Binary Component
 
+BinaryLogicControl.razor
 ```
-window.SetElementFocus = function (element) {
-    element.focus();
-    return element === true;
+@if (this.Show)
+{
+    if (this.ChildContent != null)
+    {
+        @this.ChildContent
+    }
+    else
+    {
+        @((MarkupString)this.Body)
+    }
 }
-
-window.SetFocusByElementId = function (elementId) {
-    var element = document.getElementById(elementId);
-    element.focus();
-    return element === true;
-}
-```
-
-Reference the js file in your startup file (this is for server)
-
-```
-    <script src="/site.js"></script>
-    <script src="_framework/blazor.server.js"></script>
-```
-
-And then here's a demo page using both `Element` and `id` to set the focus
-
-```
-@page "/Test6"
-<div class="m-2">
-    <input type="text" @ref="Input1" placeholder="Input 1" id="input1" />
-</div>
-
-<div class="m-2">
-    <input type="text" @ref="Input2" placeholder="Input 2" id="input2" />
-</div>
-
-<div class="m-2">
-    <input type="text" @ref="Input3" placeholder="Input 3" id="input3" />
-</div>
-
-<div class="m-2 p-2">
-    <button class="btn btn-dark me-1" @onclick="() => Focus(1)">Element Focus 1</button>
-    <button class="btn btn-dark me-1" @onclick="() => Focus(2)">Element Focus 2</button>
-    <button class="btn btn-dark me-1" @onclick="() => Focus(3)">Element Focus 3</button>
-</div>
-
-<div class="m-2 p-2">
-    <button class="btn btn-secondary me-1" @onclick="() => FocusById(1)">Id Focus 1</button>
-    <button class="btn btn-secondary me-1" @onclick="() => FocusById(2)">Id Focus 2</button>
-    <button class="btn btn-secondary me-1" @onclick="() => FocusById(3)">Id Focus 3</button>
-</div>
-
 
 @code {
+    [Parameter] public bool Show { get; set; }
+    [Parameter] public RenderFragment ChildContent { get; set; }
+    [Parameter] public string Body { get; set; }
+}
+```
 
-    [Inject] private IJSRuntime _js { get; set; }
+and then using it:
 
-    private ElementReference Input1;
-    private ElementReference Input2;
-    private ElementReference Input3;
-
-    private async Task Focus(int no)
+```
+<BinaryLogicControl Show="_showDialog">
+    I'm Here!!!
+</BinaryLogicControl>
+<BinaryLogicControl Show="_showDialog" Body="@_showcontent" />
+<div>
+    <button class="btn btn-dark" @onclick="ShowDialog">Show Dialog</button>
+</div>
+@code {
+    private bool _showDialog;
+    private string _showcontent;
+    private void ShowDialog()
     {
-        var input = no switch
-        {
-            1 => Input1,
-            2 => Input2,
-            _ => Input3
-        };
-        await _js.InvokeAsync<bool>("SetElementFocus", input);
-    }
-
-    private async Task FocusById(int no)
-    {
-        var input = no switch
-        {
-            1 => "input1",
-            2 => "input2",
-            _ => "input3"
-        };
-        await _js.InvokeAsync<bool>("SetFocusByElementId", input);
+        _showDialog = !_showDialog;
+        _showcontent = _showDialog ? "<div>Hello There</div>" : string.Empty;
     }
 }
 ```

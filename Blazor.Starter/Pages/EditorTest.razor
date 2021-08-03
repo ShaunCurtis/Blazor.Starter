@@ -32,8 +32,19 @@
         <CustomDate @bind-Value="model.Date" DisplayName="EMail"></CustomDate>
         @*<ValidationMessage For="() => model.Date"></ValidationMessage>*@
     </div>
-    <InputDate @bind-Value="model.MyDate"></InputDate>
+
+    <InputCheckbox @bind-Value="model.CbValue" />
+    <div>@model.CBText</div>
+
 </EditForm>
+
+<BinaryLogicControl Show="_showDialog">
+    I'm Here!!!
+</BinaryLogicControl>
+<BinaryLogicControl Show="_showDialog" Body="@_showcontent" />
+<div>
+    <button class="btn btn-dark" @onclick="ShowDialog">Show Dialog</button>
+</div>
 <input type="date" @bind-value="this.MyDate" />
 <div class="m-3 p-3"><input @bind-value="_errormessage"><button class="btn btn-dark ms-2" @onclick="SetError">Set Error</button></div>
 
@@ -168,11 +179,18 @@
         {
             _messageStore.Clear();
         }
+    }
 
+    private bool _showDialog;
+    private string _showcontent;
+    private void ShowDialog()
+    {
+        _showDialog = !_showDialog;
+        _showcontent = _showDialog ? "<div>Hello There</div>" : string.Empty;
     }
 
     private void Focus()
-      => _js.InvokeAsync<bool>("SetElementFocus", myFocusInput);
+  => _js.InvokeAsync<bool>("SetElementFocus", myFocusInput);
 
     private bool isDirty = false;
     private string buttonText => isDirty ? "Set Clean" : "Set Dirty";
@@ -208,6 +226,9 @@
         public string? Email { get; set; }
         public DateTime? Date { get; set; }
 
+        public bool CbValue { get; set; }
+
+        public string CBText => CbValue.AsYesNo();
         public DateTime? MyDate
         {
             get => _myDate;
@@ -221,6 +242,11 @@
             }
         }
         private DateTime? _myDate;
+    }
+
+    public class SubModel
+    {
+        public int Value { get; set; }
     }
 
     public DateTime? MyDate

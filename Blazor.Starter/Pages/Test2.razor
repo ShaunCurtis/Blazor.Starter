@@ -12,9 +12,12 @@
     <label class="form-label">First Name (Updates on Typing)</label>
     <InputTextOnInput class="form-control" @bind-Value="this._formModel.FirstName"></InputTextOnInput>
     <CustomInput class="form-control" @bind-Value="this._formModel.FirstName"></CustomInput>
+    <label class="form-label">Surname (Only Updates on Exit)</label>
+    <InputText class="form-control" @bind-Value="this._formModel.subModel.SurName"></InputText>
     <div class=" m-2 p-2">
         <button type="submit" class="btn btn-primary">New Person</button>
     </div>
+
 
 
 </EditForm>
@@ -36,6 +39,7 @@
 
     private void HandleInValidSubmit()
     {
+        var x = _editContext.GetValidationMessages();
         _submitType = "INVALID SUBMIT!";
         System.Diagnostics.Debug.WriteLine("INVALID SUBMIT!");
     }
@@ -45,6 +49,21 @@
         [Required(AllowEmptyStrings = false, ErrorMessage = "Provide a first name")]
         public string FirstName { get; set; }
 
+        public SubFormModel subModel = new SubFormModel();
+
+    }
+
+    private class SubFormModel
+    {
+        [Required(AllowEmptyStrings = false, ErrorMessage = "Provide a Surname")]
+        public string SurName { get; set; }
+
+    }
+
+    private async Task<List<string>> MyList()
+    {
+        await Task.Delay(10000);
+        return new List<string> { "one", "two" };
     }
 
     protected override Task OnInitializedAsync()

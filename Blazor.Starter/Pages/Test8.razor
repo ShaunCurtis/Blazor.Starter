@@ -1,0 +1,26 @@
+﻿@page "/Test8"
+<h3>Test8</h3>
+<input @bind-value="content" class="form-control" />
+<button class="btn btn-dark" @onclick="RenderSomeContent">Render Content</button>
+<button class="btn btn-danger ml-2" @onclick="ClearContent">Clear Content</button>
+
+@Placeholder
+
+@code {
+    RenderFragment Placeholder { get; set; }
+
+    string content = "<div class='m-3 bg-success'>Hello</div>";
+
+    void RenderSomeContent()
+    {
+        Placeholder = (builder) =>
+        {
+            builder.AddMarkupContent(0, content);
+        };
+    }
+
+    void ClearContent()
+    {
+        Placeholder = null;
+    }
+}
